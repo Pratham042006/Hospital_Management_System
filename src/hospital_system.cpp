@@ -23,6 +23,27 @@ Patient HospitalSystem::updatePatient(const Session& session,
     return patients_.updatePatient(patientId, update);
 }
 
+std::optional<Patient> HospitalSystem::searchPatientById(
+    const Session& session,
+    const std::string& patientId) const {
+    require(session, Permission::SearchPatient);
+    return patients_.findById(patientId);
+}
+
+std::vector<Patient> HospitalSystem::searchPatientsByName(
+    const Session& session,
+    const std::string& name) const {
+    require(session, Permission::SearchPatient);
+    return patients_.findByName(name);
+}
+
+std::vector<Patient> HospitalSystem::searchPatientsByContact(
+    const Session& session,
+    const std::string& contact) const {
+    require(session, Permission::SearchPatient);
+    return patients_.findByContact(contact);
+}
+
 std::size_t HospitalSystem::patientCount() const noexcept {
     return patients_.size();
 }

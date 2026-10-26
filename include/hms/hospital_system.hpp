@@ -24,6 +24,12 @@ public:
     Patient updatePatient(const Session& session,
                           const std::string& patientId,
                           const PatientUpdate& update);
+    std::optional<Patient> searchPatientById(const Session& session,
+                                             const std::string& patientId) const;
+    std::vector<Patient> searchPatientsByName(const Session& session,
+                                              const std::string& name) const;
+    std::vector<Patient> searchPatientsByContact(const Session& session,
+                                                 const std::string& contact) const;
     std::size_t patientCount() const noexcept;
 
 private:

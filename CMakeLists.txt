@@ -30,3 +30,7 @@ add_test(NAME registration_tests COMMAND registration_tests)
 add_executable(update_tests tests/test_update.cpp)
 target_link_libraries(update_tests PRIVATE hms_core)
 add_test(NAME update_tests COMMAND update_tests)
+
+add_executable(search_tests tests/test_search.cpp)
+target_link_libraries(search_tests PRIVATE hms_core)
+add_test(NAME search_tests COMMAND search_tests)

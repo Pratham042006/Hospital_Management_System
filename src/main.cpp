@@ -47,6 +47,32 @@ void updatePatient(hms::HospitalSystem& system, const hms::Session& session) {
     std::cout << "Patient updated successfully. ID remains " << patient.id << ".\n";
 }
 
+void printPatient(const hms::Patient& patient) {
+    std::cout << patient.id << " | " << patient.fullName << " | " << patient.dateOfBirth
+              << " | " << patient.gender << " | " << patient.phone << " | "
+              << patient.email << " | " << patient.address << '\n';
+}
+
+void searchPatients(const hms::HospitalSystem& system, const hms::Session& session) {
+    std::cout << "Search by: 1) Patient ID  2) Name  3) Contact\n";
+    const std::string option = prompt("Choice: ");
+    const std::string query = prompt("Search value: ");
+    if (option == "1") {
+        const auto patient = system.searchPatientById(session, query);
+        if (patient) printPatient(*patient);
+        else std::cout << "No patient matched that ID.\n";
+        return;
+    }
+
+    const auto matches = option == "2" ? system.searchPatientsByName(session, query)
+                                         : system.searchPatientsByContact(session, query);
+    if (matches.empty()) {
+        std::cout << "No patients matched the search.\n";
+        return;
+    }
+    for (const auto& patient : matches) printPatient(patient);
+}
+
 }  // namespace
 
 int main() {
@@ -68,9 +94,9 @@ int main() {
 
     while (true) {
         const std::string choice = prompt(
-            "\n1) Register patient  2) Update patient  0) Exit\nChoice: ");
+            "\n1) Register patient  2) Update patient  3) Search patients  0) Exit\nChoice: ");
         if (choice == "0") break;
-        if (choice != "1" && choice != "2") {
+        if (choice != "1" && choice != "2" && choice != "3") {
             std::cout << "Unknown menu option.\n";
             continue;
         }
@@ -78,8 +104,10 @@ int main() {
             if (choice == "1") {
                 const auto patient = system.registerPatient(*session, readPatientDraft());
                 std::cout << "Patient registered successfully with ID " << patient.id << ".\n";
-            } else {
+            } else if (choice == "2") {
                 updatePatient(system, *session);
+            } else {
+                searchPatients(system, *session);
             }
         } catch (const std::exception& error) {
             std::cout << "Operation failed: " << error.what() << '\n';

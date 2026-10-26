@@ -83,6 +83,38 @@ Patient PatientRepository::updatePatient(const std::string& patientId,
     return candidate;
 }
 
+std::optional<Patient> PatientRepository::findById(const std::string& patientId) const {
+    const auto found = std::find_if(patients_.begin(), patients_.end(), [&](const Patient& patient) {
+        return patient.id == patientId;
+    });
+    return found == patients_.end() ? std::nullopt : std::optional<Patient>{*found};
+}
+
+std::vector<Patient> PatientRepository::findByName(const std::string& name) const {
+    const std::string query = normalizeText(name);
+    std::vector<Patient> matches;
+    if (query.empty()) return matches;
+    for (const auto& patient : patients_) {
+        if (normalizeText(patient.fullName).find(query) != std::string::npos) {
+            matches.push_back(patient);
+        }
+    }
+    return matches;
+}
+
+std::vector<Patient> PatientRepository::findByContact(const std::string& contact) const {
+    const std::string phone = normalizePhone(contact);
+    const std::string email = normalizeText(contact);
+    std::vector<Patient> matches;
+    for (const auto& patient : patients_) {
+        if ((!phone.empty() && normalizePhone(patient.phone) == phone) ||
+            (!email.empty() && normalizeText(patient.email) == email)) {
+            matches.push_back(patient);
+        }
+    }
+    return matches;
+}
+
 std::size_t PatientRepository::size() const noexcept {
     return patients_.size();
 }

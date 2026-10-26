@@ -13,6 +13,9 @@ class PatientRepository {
 public:
     Patient registerPatient(const PatientDraft& draft);
     Patient updatePatient(const std::string& patientId, const PatientUpdate& update);
+    std::optional<Patient> findById(const std::string& patientId) const;
+    std::vector<Patient> findByName(const std::string& name) const;
+    std::vector<Patient> findByContact(const std::string& contact) const;
     std::size_t size() const noexcept;
 
 private:
