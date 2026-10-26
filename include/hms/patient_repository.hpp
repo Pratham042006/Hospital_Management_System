@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace hms {
@@ -20,6 +21,9 @@ public:
 
 private:
     std::vector<Patient> patients_;
+    std::unordered_map<std::string, std::size_t> idIndex_;
+    std::unordered_map<std::string, std::string> phoneIndex_;
+    std::unordered_map<std::string, std::string> emailIndex_;
     std::size_t nextPatientNumber_{1};
 
     static std::string trim(const std::string& value);
@@ -32,6 +36,8 @@ private:
     void ensureUniqueContacts(
         const Patient& patient,
         const std::optional<std::string>& ignoredPatientId = std::nullopt) const;
+    void addToIndexes(const Patient& patient, std::size_t index);
+    void removeContactIndexes(const Patient& patient);
 };
 
 }  // namespace hms

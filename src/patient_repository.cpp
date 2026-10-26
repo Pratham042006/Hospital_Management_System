@@ -56,7 +56,9 @@ Patient PatientRepository::registerPatient(const PatientDraft& draft) {
 
     validate(patient);
     ensureUniqueContacts(patient);
+    const std::size_t index = patients_.size();
     patients_.push_back(patient);
+    addToIndexes(patients_.back(), index);
     return patient;
 }
 
@@ -79,15 +81,18 @@ Patient PatientRepository::updatePatient(const std::string& patientId,
 
     validate(candidate);
     ensureUniqueContacts(candidate, patientId);
-    patients_.at(index) = candidate;
-    return candidate;
+
+    Patient& stored = patients_.at(index);
+    removeContactIndexes(stored);
+    stored = candidate;
+    addToIndexes(stored, index);
+    return stored;
 }
 
 std::optional<Patient> PatientRepository::findById(const std::string& patientId) const {
-    const auto found = std::find_if(patients_.begin(), patients_.end(), [&](const Patient& patient) {
-        return patient.id == patientId;
-    });
-    return found == patients_.end() ? std::nullopt : std::optional<Patient>{*found};
+    const auto found = idIndex_.find(patientId);
+    if (found == idIndex_.end()) return std::nullopt;
+    return patients_.at(found->second);
 }
 
 std::vector<Patient> PatientRepository::findByName(const std::string& name) const {
@@ -106,10 +111,19 @@ std::vector<Patient> PatientRepository::findByContact(const std::string& contact
     const std::string phone = normalizePhone(contact);
     const std::string email = normalizeText(contact);
     std::vector<Patient> matches;
-    for (const auto& patient : patients_) {
-        if ((!phone.empty() && normalizePhone(patient.phone) == phone) ||
-            (!email.empty() && normalizeText(patient.email) == email)) {
-            matches.push_back(patient);
+
+    if (!phone.empty()) {
+        const auto phoneMatch = phoneIndex_.find(phone);
+        if (phoneMatch != phoneIndex_.end()) {
+            const auto patient = findById(phoneMatch->second);
+            if (patient) matches.push_back(*patient);
+        }
+    }
+    const auto emailMatch = emailIndex_.find(email);
+    if (emailMatch != emailIndex_.end()) {
+        const auto patient = findById(emailMatch->second);
+        if (patient && (matches.empty() || matches.front().id != patient->id)) {
+            matches.push_back(*patient);
         }
     }
     return matches;
@@ -174,13 +188,11 @@ std::string PatientRepository::generatePatientId() {
 }
 
 std::size_t PatientRepository::indexForId(const std::string& patientId) const {
-    const auto found = std::find_if(patients_.begin(), patients_.end(), [&](const Patient& patient) {
-        return patient.id == patientId;
-    });
-    if (found == patients_.end()) {
+    const auto found = idIndex_.find(patientId);
+    if (found == idIndex_.end()) {
         throw std::invalid_argument("Patient ID was not found: " + patientId);
     }
-    return static_cast<std::size_t>(std::distance(patients_.begin(), found));
+    return found->second;
 }
 
 void PatientRepository::ensureUniqueContacts(
@@ -188,15 +200,31 @@ void PatientRepository::ensureUniqueContacts(
     const std::optional<std::string>& ignoredPatientId) const {
     const std::string phone = normalizePhone(patient.phone);
     const std::string email = normalizeText(patient.email);
-    for (const auto& existing : patients_) {
-        if (ignoredPatientId && existing.id == *ignoredPatientId) continue;
-        if (normalizePhone(existing.phone) == phone) {
-            throw std::invalid_argument("A patient with this phone number already exists.");
-        }
-        if (!email.empty() && normalizeText(existing.email) == email) {
+    const auto phoneOwner = phoneIndex_.find(phone);
+    if (phoneOwner != phoneIndex_.end() &&
+        (!ignoredPatientId || phoneOwner->second != *ignoredPatientId)) {
+        throw std::invalid_argument("A patient with this phone number already exists.");
+    }
+    if (!email.empty()) {
+        const auto emailOwner = emailIndex_.find(email);
+        if (emailOwner != emailIndex_.end() &&
+            (!ignoredPatientId || emailOwner->second != *ignoredPatientId)) {
             throw std::invalid_argument("A patient with this email address already exists.");
         }
     }
+}
+
+void PatientRepository::addToIndexes(const Patient& patient, std::size_t index) {
+    idIndex_[patient.id] = index;
+    phoneIndex_[normalizePhone(patient.phone)] = patient.id;
+    const std::string email = normalizeText(patient.email);
+    if (!email.empty()) emailIndex_[email] = patient.id;
+}
+
+void PatientRepository::removeContactIndexes(const Patient& patient) {
+    phoneIndex_.erase(normalizePhone(patient.phone));
+    const std::string email = normalizeText(patient.email);
+    if (!email.empty()) emailIndex_.erase(email);
 }
 
 }  // namespace hms

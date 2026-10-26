@@ -34,3 +34,7 @@ add_test(NAME update_tests COMMAND update_tests)
 add_executable(search_tests tests/test_search.cpp)
 target_link_libraries(search_tests PRIVATE hms_core)
 add_test(NAME search_tests COMMAND search_tests)
+
+add_executable(performance_tests tests/test_performance.cpp)
+target_link_libraries(performance_tests PRIVATE hms_core)
+add_test(NAME performance_tests COMMAND performance_tests)
