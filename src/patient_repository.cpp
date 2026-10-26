@@ -60,6 +60,29 @@ Patient PatientRepository::registerPatient(const PatientDraft& draft) {
     return patient;
 }
 
+Patient PatientRepository::updatePatient(const std::string& patientId,
+                                         const PatientUpdate& update) {
+    const std::size_t index = indexForId(patientId);
+    Patient candidate = patients_.at(index);
+    if (update.fullName) candidate.fullName = trim(*update.fullName);
+    if (update.dateOfBirth) candidate.dateOfBirth = trim(*update.dateOfBirth);
+    if (update.gender) candidate.gender = trim(*update.gender);
+    if (update.phone) candidate.phone = trim(*update.phone);
+    if (update.email) candidate.email = trim(*update.email);
+    if (update.address) candidate.address = trim(*update.address);
+    if (update.emergencyContactName) {
+        candidate.emergencyContactName = trim(*update.emergencyContactName);
+    }
+    if (update.emergencyContactPhone) {
+        candidate.emergencyContactPhone = trim(*update.emergencyContactPhone);
+    }
+
+    validate(candidate);
+    ensureUniqueContacts(candidate, patientId);
+    patients_.at(index) = candidate;
+    return candidate;
+}
+
 std::size_t PatientRepository::size() const noexcept {
     return patients_.size();
 }
@@ -118,10 +141,23 @@ std::string PatientRepository::generatePatientId() {
     return id.str();
 }
 
-void PatientRepository::ensureUniqueContacts(const Patient& patient) const {
+std::size_t PatientRepository::indexForId(const std::string& patientId) const {
+    const auto found = std::find_if(patients_.begin(), patients_.end(), [&](const Patient& patient) {
+        return patient.id == patientId;
+    });
+    if (found == patients_.end()) {
+        throw std::invalid_argument("Patient ID was not found: " + patientId);
+    }
+    return static_cast<std::size_t>(std::distance(patients_.begin(), found));
+}
+
+void PatientRepository::ensureUniqueContacts(
+    const Patient& patient,
+    const std::optional<std::string>& ignoredPatientId) const {
     const std::string phone = normalizePhone(patient.phone);
     const std::string email = normalizeText(patient.email);
     for (const auto& existing : patients_) {
+        if (ignoredPatientId && existing.id == *ignoredPatientId) continue;
         if (normalizePhone(existing.phone) == phone) {
             throw std::invalid_argument("A patient with this phone number already exists.");
         }

@@ -16,6 +16,13 @@ Patient HospitalSystem::registerPatient(const Session& session, const PatientDra
     return patients_.registerPatient(draft);
 }
 
+Patient HospitalSystem::updatePatient(const Session& session,
+                                      const std::string& patientId,
+                                      const PatientUpdate& update) {
+    require(session, Permission::UpdatePatient);
+    return patients_.updatePatient(patientId, update);
+}
+
 std::size_t HospitalSystem::patientCount() const noexcept {
     return patients_.size();
 }

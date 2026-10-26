@@ -3,6 +3,7 @@
 #include "hms/patient.hpp"
 
 #include <cstddef>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -11,6 +12,7 @@ namespace hms {
 class PatientRepository {
 public:
     Patient registerPatient(const PatientDraft& draft);
+    Patient updatePatient(const std::string& patientId, const PatientUpdate& update);
     std::size_t size() const noexcept;
 
 private:
@@ -23,7 +25,10 @@ private:
     static void validate(const Patient& patient);
 
     std::string generatePatientId();
-    void ensureUniqueContacts(const Patient& patient) const;
+    std::size_t indexForId(const std::string& patientId) const;
+    void ensureUniqueContacts(
+        const Patient& patient,
+        const std::optional<std::string>& ignoredPatientId = std::nullopt) const;
 };
 
 }  // namespace hms

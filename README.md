@@ -6,6 +6,7 @@ This branch contains the C++17 Sprint 1 work assigned to Pratham Mudakavi.
 
 - **FR-01 — User Login and Access:** authenticated sessions, useful login failures, four roles, permission checks, and role-specific menus.
 - **FR-02 — Patient Registration:** generated patient IDs, required identity/contact/address/emergency fields, validation, and duplicate prevention.
+- **FR-03 — Patient Record Update:** authorized updates, immutable patient IDs, atomic validation, and clear unknown-patient errors.
 
 ## Build and test
 

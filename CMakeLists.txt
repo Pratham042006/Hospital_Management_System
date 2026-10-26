@@ -26,3 +26,7 @@ add_test(NAME hms_tests COMMAND hms_tests)
 add_executable(registration_tests tests/test_registration.cpp)
 target_link_libraries(registration_tests PRIVATE hms_core)
 add_test(NAME registration_tests COMMAND registration_tests)
+
+add_executable(update_tests tests/test_update.cpp)
+target_link_libraries(update_tests PRIVATE hms_core)
+add_test(NAME update_tests COMMAND update_tests)

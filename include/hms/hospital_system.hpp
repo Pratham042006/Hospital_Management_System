@@ -21,6 +21,9 @@ public:
                                  const std::string& password) const;
     std::vector<std::string> menuFor(const Session& session) const;
     Patient registerPatient(const Session& session, const PatientDraft& draft);
+    Patient updatePatient(const Session& session,
+                          const std::string& patientId,
+                          const PatientUpdate& update);
     std::size_t patientCount() const noexcept;
 
 private:
