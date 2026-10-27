@@ -1,6 +1,6 @@
 # Hospital Management System
 
-This branch contains the C++17 Sprint 1 work assigned to Pratham Mudakavi.
+This repository contains the C++17 Hospital Management System project.
 
 ## Implemented requirements
 
@@ -9,6 +9,7 @@ This branch contains the C++17 Sprint 1 work assigned to Pratham Mudakavi.
 - **FR-03 — Patient Record Update:** authorized updates, immutable patient IDs, atomic validation, and clear unknown-patient errors.
 - **FR-04 — Patient Search:** exact ID lookup, case-insensitive partial-name search, phone/email lookup, and empty no-match results.
 - **NFR-01 — Performance:** in-memory indexes for patient IDs and contact fields plus a 10,000-patient search test with a three-second limit.
+- **NFR-05 — Maintainability:** patient validation and normalization are isolated from repository storage, and the console presentation layer is separate from the application entry point.
 
 ## Build and test
 
@@ -37,7 +38,13 @@ These are local demonstration accounts. Passwords are converted to salted digest
 
 ## Project structure
 
-- `include/hms/` — public domain and service interfaces
-- `src/` — authentication, authorization, patient repository, application service, and CLI
+- `include/hms/` — domain models and public service interfaces
+- `src/auth.cpp` — authentication, roles, and permission policy
+- `src/patient_repository.cpp` — patient storage, indexes, and repository operations
+- `src/patient_validation.cpp` — patient input normalization and validation rules
+- `src/hospital_system.cpp` — application workflows and authorization checks
+- `src/console_app.cpp` — console prompts, menus, and output; `src/main.cpp` is the entry point
 - `tests/` — separate tests for each Sprint 1 requirement
+
+The current code implements authentication and patient workflows. Doctor, appointment, admission, clinical, billing, and reporting workflows are not implemented yet; add each as its own domain and service module when that functionality is introduced. Keep persistent storage behind repository interfaces so storage choices do not spread into the console or application layer.
 
