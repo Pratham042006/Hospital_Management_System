@@ -13,7 +13,11 @@ add_library(hms_core
 )
 
 target_include_directories(hms_core PUBLIC include)
-target_compile_options(hms_core PRIVATE -Wall -Wextra -Wpedantic)
+if(MSVC)
+    target_compile_options(hms_core PRIVATE /W4 /permissive-)
+else()
+    target_compile_options(hms_core PRIVATE -Wall -Wextra -Wpedantic)
+endif()
 
 add_executable(hms src/main.cpp)
 target_link_libraries(hms PRIVATE hms_core)

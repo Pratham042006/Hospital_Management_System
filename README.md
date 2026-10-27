@@ -9,6 +9,9 @@ This branch contains the C++17 Sprint 1 work assigned to Pratham Mudakavi.
 - **FR-03 — Patient Record Update:** authorized updates, immutable patient IDs, atomic validation, and clear unknown-patient errors.
 - **FR-04 — Patient Search:** exact ID lookup, case-insensitive partial-name search, phone/email lookup, and empty no-match results.
 - **NFR-01 — Performance:** in-memory indexes for patient IDs and contact fields plus a 10,000-patient search test with a three-second limit.
+- **NFR-04 — Security:** only administrators can add accounts, sessions cannot be constructed with a caller-chosen role, console password input is hidden, and patient search results are scoped by role.
+
+Patient search shows the full record to administrators, registration and contact details to receptionists, demographics and emergency contacts to doctors, and only patient ID and name to billing staff.
 
 ## Build and test
 
@@ -40,4 +43,3 @@ These are local demonstration accounts. Passwords are converted to salted digest
 - `include/hms/` — public domain and service interfaces
 - `src/` — authentication, authorization, patient repository, application service, and CLI
 - `tests/` — separate tests for each Sprint 1 requirement
-
