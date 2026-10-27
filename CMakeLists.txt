@@ -9,6 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(hms_core
     src/auth.cpp
     src/patient_repository.cpp
+    src/patient_validation.cpp
     src/hospital_system.cpp
 )
 
