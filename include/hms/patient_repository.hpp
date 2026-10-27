@@ -26,11 +26,6 @@ private:
     std::unordered_map<std::string, std::string> emailIndex_;
     std::size_t nextPatientNumber_{1};
 
-    static std::string trim(const std::string& value);
-    static std::string normalizeText(const std::string& value);
-    static std::string normalizePhone(const std::string& value);
-    static void validate(const Patient& patient);
-
     std::string generatePatientId();
     std::size_t indexForId(const std::string& patientId) const;
     void ensureUniqueContacts(
