@@ -3,7 +3,8 @@
 **Author:** Prathik M Nambiar
 **Requirement (SRS 4.6):** the source code should compile on commonly available C/C++ compilers with minimal changes, and should avoid unnecessary platform-specific dependencies.
 
-This file covers only my NFR-06 work. The Sprint 1 functional code (FR-01 to FR-04) and NFR-01 are documented in the main `README.md`.
+This branch contains only my NFR-06 work. The Sprint 1 functional code (FR-01 to FR-04) and NFR-01 are by Pratham Mudakavi, on his branch."
+assert old in s, "line not found
 
 ## What was done
 
