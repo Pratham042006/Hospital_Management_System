@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 
 namespace hms {
@@ -24,6 +25,13 @@ struct Appointment {
     std::string time;
     std::string purpose;
     AppointmentStatus status{AppointmentStatus::Scheduled};
+};
+
+struct AppointmentUpdate {
+    std::optional<std::string> doctorId;
+    std::optional<std::string> date;
+    std::optional<std::string> time;
+    std::optional<std::string> purpose;
 };
 
 }  // namespace hms

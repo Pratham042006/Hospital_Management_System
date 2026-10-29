@@ -67,6 +67,11 @@ public:
 
     Appointment scheduleAppointment(const Session& session,
                                     const AppointmentDraft& draft);
+    Appointment rescheduleAppointment(const Session& session,
+                                      const std::string& appointmentId,
+                                      const AppointmentUpdate& update);
+    Appointment cancelAppointment(const Session& session,
+                                  const std::string& appointmentId);
     std::optional<Appointment> findAppointmentById(
         const Session& session,
         const std::string& appointmentId) const;
