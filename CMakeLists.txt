@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(hms_core
     src/auth.cpp
+    src/doctor_repository.cpp
     src/patient_repository.cpp
     src/hospital_system.cpp
 )
@@ -46,3 +47,7 @@ add_test(NAME performance_tests COMMAND performance_tests)
 add_executable(security_tests tests/test_security.cpp)
 target_link_libraries(security_tests PRIVATE hms_core)
 add_test(NAME security_tests COMMAND security_tests)
+
+add_executable(doctor_tests tests/test_doctors.cpp)
+target_link_libraries(doctor_tests PRIVATE hms_core)
+add_test(NAME doctor_tests COMMAND doctor_tests)

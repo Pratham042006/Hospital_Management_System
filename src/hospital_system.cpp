@@ -106,6 +106,37 @@ std::size_t HospitalSystem::patientCount() const noexcept {
     return patients_.size();
 }
 
+Doctor HospitalSystem::addDoctor(const Session& session, const DoctorDraft& draft) {
+    require(session, Permission::ManageDoctors);
+    return doctors_.addDoctor(draft);
+}
+
+Doctor HospitalSystem::updateDoctor(const Session& session,
+                                    const std::string& doctorId,
+                                    const DoctorUpdate& update) {
+    require(session, Permission::ManageDoctors);
+    return doctors_.updateDoctor(doctorId, update);
+}
+
+std::optional<Doctor> HospitalSystem::findDoctorById(
+    const Session& session,
+    const std::string& doctorId) const {
+    require(session, Permission::ViewDoctors);
+    return doctors_.findById(doctorId);
+}
+
+std::vector<Doctor> HospitalSystem::searchDoctors(
+    const Session& session,
+    const std::string& query) const {
+    require(session, Permission::ViewDoctors);
+    return doctors_.search(query);
+}
+
+std::vector<Doctor> HospitalSystem::listDoctors(const Session& session) const {
+    require(session, Permission::ViewDoctors);
+    return doctors_.list();
+}
+
 void HospitalSystem::require(const Session& session, Permission permission) const {
     if (!auth_.isAllowed(session, permission)) {
         throw AuthorizationError("The " + toString(session.role) +
