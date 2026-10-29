@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hms/auth.hpp"
+#include "hms/appointment_repository.hpp"
 #include "hms/doctor_repository.hpp"
 #include "hms/patient_repository.hpp"
 
@@ -64,10 +65,18 @@ public:
                                       const std::string& query) const;
     std::vector<Doctor> listDoctors(const Session& session) const;
 
+    Appointment scheduleAppointment(const Session& session,
+                                    const AppointmentDraft& draft);
+    std::optional<Appointment> findAppointmentById(
+        const Session& session,
+        const std::string& appointmentId) const;
+    std::vector<Appointment> listAppointments(const Session& session) const;
+
 private:
     AuthService auth_;
     PatientRepository patients_;
     DoctorRepository doctors_;
+    AppointmentRepository appointments_;
 
     void require(const Session& session, Permission permission) const;
 };

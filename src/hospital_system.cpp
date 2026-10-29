@@ -137,6 +137,34 @@ std::vector<Doctor> HospitalSystem::listDoctors(const Session& session) const {
     return doctors_.list();
 }
 
+Appointment HospitalSystem::scheduleAppointment(
+    const Session& session,
+    const AppointmentDraft& draft) {
+    require(session, Permission::ManageAppointments);
+    if (!patients_.findById(draft.patientId)) {
+        throw std::invalid_argument("Patient ID does not exist.");
+    }
+    if (!doctors_.findById(draft.doctorId)) {
+        throw std::invalid_argument("Doctor ID does not exist.");
+    }
+    if (!doctors_.isAvailable(draft.doctorId, draft.date, draft.time)) {
+        throw std::invalid_argument("The doctor is not available at the requested date and time.");
+    }
+    return appointments_.schedule(draft);
+}
+
+std::optional<Appointment> HospitalSystem::findAppointmentById(
+    const Session& session,
+    const std::string& appointmentId) const {
+    require(session, Permission::ViewAppointments);
+    return appointments_.findById(appointmentId);
+}
+
+std::vector<Appointment> HospitalSystem::listAppointments(const Session& session) const {
+    require(session, Permission::ViewAppointments);
+    return appointments_.list();
+}
+
 void HospitalSystem::require(const Session& session, Permission permission) const {
     if (!auth_.isAllowed(session, permission)) {
         throw AuthorizationError("The " + toString(session.role) +
