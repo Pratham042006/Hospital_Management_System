@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <cctype>
+#include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <regex>
 #include <sstream>
@@ -39,7 +41,51 @@ bool isValidEmail(const std::string& email) {
            dot + 1 < email.size();
 }
 
+std::string hexEncode(const std::string& value) {
+    static constexpr char digits[] = "0123456789ABCDEF";
+    std::string encoded;
+    encoded.reserve(value.size() * 2);
+    for (const unsigned char ch : value) {
+        encoded.push_back(digits[ch >> 4]);
+        encoded.push_back(digits[ch & 0x0F]);
+    }
+    return encoded;
+}
+
+int hexValue(char value) {
+    if (value >= '0' && value <= '9') return value - '0';
+    if (value >= 'A' && value <= 'F') return value - 'A' + 10;
+    if (value >= 'a' && value <= 'f') return value - 'a' + 10;
+    return -1;
+}
+
+std::string hexDecode(const std::string& value) {
+    if (value.size() % 2 != 0) throw std::runtime_error("Malformed patient journal field.");
+    std::string decoded;
+    decoded.reserve(value.size() / 2);
+    for (std::size_t index = 0; index < value.size(); index += 2) {
+        const int high = hexValue(value[index]);
+        const int low = hexValue(value[index + 1]);
+        if (high < 0 || low < 0) throw std::runtime_error("Malformed patient journal field.");
+        decoded.push_back(static_cast<char>((high << 4) | low));
+    }
+    return decoded;
+}
+
+std::vector<std::string> splitTabs(const std::string& line) {
+    std::vector<std::string> fields;
+    std::istringstream input(line);
+    std::string field;
+    while (std::getline(input, field, '\t')) fields.push_back(field);
+    return fields;
+}
+
 }  // namespace
+
+PatientRepository::PatientRepository(const std::optional<std::string>& journalPath)
+    : journalPath_(journalPath) {
+    if (journalPath_) loadJournal();
+}
 
 Patient PatientRepository::registerPatient(const PatientDraft& draft) {
     Patient patient{
@@ -56,6 +102,7 @@ Patient PatientRepository::registerPatient(const PatientDraft& draft) {
 
     validate(patient);
     ensureUniqueContacts(patient);
+    appendToJournal(patient);
     const std::size_t index = patients_.size();
     patients_.push_back(patient);
     addToIndexes(patients_.back(), index);
@@ -81,6 +128,7 @@ Patient PatientRepository::updatePatient(const std::string& patientId,
 
     validate(candidate);
     ensureUniqueContacts(candidate, patientId);
+    appendToJournal(candidate);
 
     Patient& stored = patients_.at(index);
     removeContactIndexes(stored);
@@ -225,6 +273,72 @@ void PatientRepository::removeContactIndexes(const Patient& patient) {
     phoneIndex_.erase(normalizePhone(patient.phone));
     const std::string email = normalizeText(patient.email);
     if (!email.empty()) emailIndex_.erase(email);
+}
+
+void PatientRepository::appendToJournal(const Patient& patient) const {
+    if (!journalPath_) return;
+    const std::filesystem::path path(*journalPath_);
+    const auto parent = path.parent_path();
+    std::error_code error;
+    if (!parent.empty()) std::filesystem::create_directories(parent, error);
+    if (error) {
+        throw std::runtime_error("Unable to create patient storage directory: " + error.message());
+    }
+
+    std::ofstream output(path, std::ios::app);
+    if (!output) throw std::runtime_error("Unable to open patient journal for writing.");
+    output << "UPSERT\t" << hexEncode(patient.id) << '\t' << hexEncode(patient.fullName) << '\t'
+           << hexEncode(patient.dateOfBirth) << '\t' << hexEncode(patient.gender) << '\t'
+           << hexEncode(patient.phone) << '\t' << hexEncode(patient.email) << '\t'
+           << hexEncode(patient.address) << '\t' << hexEncode(patient.emergencyContactName) << '\t'
+           << hexEncode(patient.emergencyContactPhone) << '\n';
+    output.flush();
+    if (!output) throw std::runtime_error("Unable to save the patient journal record.");
+}
+
+void PatientRepository::loadJournal() {
+    const std::filesystem::path path(*journalPath_);
+    if (!std::filesystem::exists(path)) return;
+    std::ifstream input(path);
+    if (!input) throw std::runtime_error("Unable to open patient journal for reading.");
+
+    std::string line;
+    std::size_t lineNumber = 0;
+    while (std::getline(input, line)) {
+        ++lineNumber;
+        const auto fields = splitTabs(line);
+        if (fields.size() != 10 || fields.front() != "UPSERT") {
+            throw std::runtime_error("Malformed patient journal record at line " +
+                                     std::to_string(lineNumber) + '.');
+        }
+        Patient patient{hexDecode(fields[1]), hexDecode(fields[2]), hexDecode(fields[3]),
+                        hexDecode(fields[4]), hexDecode(fields[5]), hexDecode(fields[6]),
+                        hexDecode(fields[7]), hexDecode(fields[8]), hexDecode(fields[9])};
+        validate(patient);
+        const auto existing = idIndex_.find(patient.id);
+        if (existing == idIndex_.end()) {
+            ensureUniqueContacts(patient);
+            const std::size_t index = patients_.size();
+            patients_.push_back(patient);
+            addToIndexes(patients_.back(), index);
+        } else {
+            ensureUniqueContacts(patient, patient.id);
+            Patient& stored = patients_.at(existing->second);
+            removeContactIndexes(stored);
+            stored = patient;
+            addToIndexes(stored, existing->second);
+        }
+        if (patient.id.size() == 7 && patient.id.front() == 'P') {
+            try {
+                nextPatientNumber_ = std::max(nextPatientNumber_,
+                                              static_cast<std::size_t>(std::stoul(patient.id.substr(1))) + 1);
+            } catch (const std::exception&) {
+                throw std::runtime_error("Malformed Patient ID in journal at line " +
+                                         std::to_string(lineNumber) + '.');
+            }
+        }
+    }
+    if (!input.eof()) throw std::runtime_error("Unable to finish reading the patient journal.");
 }
 
 }  // namespace hms
