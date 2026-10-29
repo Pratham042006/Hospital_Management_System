@@ -205,6 +205,39 @@ void doctorMenu(hms::HospitalSystem& system,
     for (const auto& doctor : doctors) printDoctor(doctor);
 }
 
+void printAppointment(const hms::Appointment& appointment) {
+    std::cout << appointment.id << " | Patient " << appointment.patientId << " | Doctor "
+              << appointment.doctorId << " | " << appointment.date << ' ' << appointment.time
+              << " | " << appointment.purpose << " | " << hms::toString(appointment.status)
+              << '\n';
+}
+
+void appointmentMenu(hms::HospitalSystem& system,
+                     const hms::Session& session,
+                     const std::vector<std::string>& actions) {
+    const bool canManage = hasAction(actions, "Manage appointments");
+    std::cout << (canManage ? "1) Schedule  " : "") << "2) Find  3) List  0) Back\n";
+    const std::string choice = prompt("Appointment choice: ");
+    if (choice == "0") return;
+    if (choice == "1" && canManage) {
+        hms::AppointmentDraft draft{prompt("Patient ID: "), prompt("Doctor ID: "),
+                                    prompt("Date (YYYY-MM-DD): "), prompt("Time (HH:MM): "),
+                                    prompt("Purpose: ")};
+        const auto appointment = system.scheduleAppointment(session, draft);
+        std::cout << "Appointment scheduled successfully with ID " << appointment.id << ".\n";
+        return;
+    }
+    if (choice == "2") {
+        const auto appointment = system.findAppointmentById(session, prompt("Appointment ID: "));
+        if (appointment) printAppointment(*appointment);
+        else std::cout << "No appointment matched that ID.\n";
+        return;
+    }
+    const auto appointments = system.listAppointments(session);
+    if (appointments.empty()) std::cout << "No appointments found.\n";
+    for (const auto& appointment : appointments) printAppointment(appointment);
+}
+
 }  // namespace
 
 int main() {
@@ -239,6 +272,10 @@ int main() {
         if (hasAction(actions, "Manage doctors") || hasAction(actions, "View doctors")) {
             std::cout << "5) Doctors  ";
         }
+        if (hasAction(actions, "Manage appointments") ||
+            hasAction(actions, "View appointments")) {
+            std::cout << "6) Appointments  ";
+        }
         std::cout << "0) Exit\n";
         const std::string choice = prompt("Choice: ");
         if (choice == "0") break;
@@ -255,6 +292,10 @@ int main() {
             } else if (choice == "5" &&
                        (hasAction(actions, "Manage doctors") || hasAction(actions, "View doctors"))) {
                 doctorMenu(system, *session, actions);
+            } else if (choice == "6" &&
+                       (hasAction(actions, "Manage appointments") ||
+                        hasAction(actions, "View appointments"))) {
+                appointmentMenu(system, *session, actions);
             } else {
                 std::cout << "This action is not available for your role.\n";
             }

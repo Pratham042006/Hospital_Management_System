@@ -9,6 +9,7 @@ This branch contains the C++17 Sprint 1 work assigned to Pratham Mudakavi.
 - **FR-03 — Patient Record Update:** authorized updates, immutable patient IDs, atomic validation, and clear unknown-patient errors.
 - **FR-04 — Patient Search:** exact ID lookup, case-insensitive partial-name search, phone/email lookup, and empty no-match results.
 - **FR-05 — Doctor Management:** add, view, update, and search complete doctor records including department and validated availability.
+- **FR-06 — Appointment Scheduling:** schedule against existing patients, doctors, and availability with real-date, time, and conflict validation.
 - **NFR-01 — Performance:** in-memory indexes for patient IDs and contact fields plus a 10,000-patient search test with a three-second limit.
 - **NFR-04 — Security:** non-forgeable sessions, administrator-only account creation, hidden password entry, and role-scoped patient views.
 

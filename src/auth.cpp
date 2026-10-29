@@ -21,6 +21,8 @@ const PermissionList& permissionsForRole(Role role) {
         Permission::ManageBilling,
         Permission::ManageDoctors,
         Permission::ViewDoctors,
+        Permission::ManageAppointments,
+        Permission::ViewAppointments,
     };
     static const PermissionList receptionist{
         Permission::RegisterPatient,
@@ -28,11 +30,14 @@ const PermissionList& permissionsForRole(Role role) {
         Permission::SearchPatient,
         Permission::ManageDoctors,
         Permission::ViewDoctors,
+        Permission::ManageAppointments,
+        Permission::ViewAppointments,
     };
     static const PermissionList doctor{
         Permission::SearchPatient,
         Permission::ViewClinicalData,
         Permission::ViewDoctors,
+        Permission::ViewAppointments,
     };
     static const PermissionList billing{
         Permission::SearchPatient,
@@ -127,6 +132,11 @@ std::vector<std::string> AuthService::availableActions(const Session& session) c
         actions.emplace_back("Manage doctors");
     } else if (isAllowed(session, Permission::ViewDoctors)) {
         actions.emplace_back("View doctors");
+    }
+    if (isAllowed(session, Permission::ManageAppointments)) {
+        actions.emplace_back("Manage appointments");
+    } else if (isAllowed(session, Permission::ViewAppointments)) {
+        actions.emplace_back("View appointments");
     }
     return actions;
 }

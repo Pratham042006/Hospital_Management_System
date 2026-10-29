@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_library(hms_core
+    src/appointment_repository.cpp
     src/auth.cpp
     src/doctor_repository.cpp
     src/patient_repository.cpp
@@ -51,3 +52,7 @@ add_test(NAME security_tests COMMAND security_tests)
 add_executable(doctor_tests tests/test_doctors.cpp)
 target_link_libraries(doctor_tests PRIVATE hms_core)
 add_test(NAME doctor_tests COMMAND doctor_tests)
+
+add_executable(appointment_scheduling_tests tests/test_appointment_scheduling.cpp)
+target_link_libraries(appointment_scheduling_tests PRIVATE hms_core)
+add_test(NAME appointment_scheduling_tests COMMAND appointment_scheduling_tests)

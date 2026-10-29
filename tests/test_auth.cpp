@@ -40,9 +40,9 @@ int main() {
     const auto receptionistMenu = system.menuFor(*receptionist);
     const auto doctorMenu = system.menuFor(*doctor);
     const auto billingMenu = system.menuFor(*billing);
-    CHECK(administratorMenu.size() == 7);
+    CHECK(administratorMenu.size() == 8);
     CHECK(contains(receptionistMenu, "Register patient"));
-    CHECK(doctorMenu.size() == 3);
+    CHECK(doctorMenu.size() == 4);
     CHECK(contains(doctorMenu, "Search patients"));
     CHECK(contains(doctorMenu, "View clinical data"));
     CHECK(!contains(doctorMenu, "Register patient"));
