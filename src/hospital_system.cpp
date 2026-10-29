@@ -39,8 +39,10 @@ PatientSearchResult projectPatient(const Patient& patient, Role role) {
 
 }  // namespace
 
-HospitalSystem::HospitalSystem(const std::vector<InitialAccount>& initialAccounts)
-    : auth_(initialAccounts) {}
+HospitalSystem::HospitalSystem(
+    const std::vector<InitialAccount>& initialAccounts,
+    const std::optional<std::string>& patientJournalPath)
+    : auth_(initialAccounts), patients_(patientJournalPath) {}
 
 std::optional<Session> HospitalSystem::login(const std::string& username,
                                              const std::string& password) const {

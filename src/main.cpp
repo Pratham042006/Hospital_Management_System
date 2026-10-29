@@ -275,7 +275,8 @@ int main() {
         std::cerr << "Set HMS_ADMIN_PASSWORD to at least 8 characters before starting HMS.\n";
         return 1;
     }
-    hms::HospitalSystem system({{"admin", configuredPassword, hms::Role::Administrator}});
+    hms::HospitalSystem system({{"admin", configuredPassword, hms::Role::Administrator}},
+                               "data/patients.journal");
     std::cout << "Hospital Management System\n";
     const std::string username = prompt("Username: ");
     const std::string password = promptPassword("Password: ");

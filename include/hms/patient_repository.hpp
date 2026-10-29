@@ -12,6 +12,9 @@ namespace hms {
 
 class PatientRepository {
 public:
+    explicit PatientRepository(
+        const std::optional<std::string>& journalPath = std::nullopt);
+
     Patient registerPatient(const PatientDraft& draft);
     Patient updatePatient(const std::string& patientId, const PatientUpdate& update);
     std::optional<Patient> findById(const std::string& patientId) const;
@@ -25,6 +28,7 @@ private:
     std::unordered_map<std::string, std::string> phoneIndex_;
     std::unordered_map<std::string, std::string> emailIndex_;
     std::size_t nextPatientNumber_{1};
+    std::optional<std::string> journalPath_;
 
     static std::string trim(const std::string& value);
     static std::string normalizeText(const std::string& value);
@@ -38,6 +42,8 @@ private:
         const std::optional<std::string>& ignoredPatientId = std::nullopt) const;
     void addToIndexes(const Patient& patient, std::size_t index);
     void removeContactIndexes(const Patient& patient);
+    void appendToJournal(const Patient& patient) const;
+    void loadJournal();
 };
 
 }  // namespace hms

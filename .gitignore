@@ -1,5 +1,6 @@
 /build/
 /data/*.csv
+/data/*.journal
 !.gitkeep
 .DS_Store
 *.o

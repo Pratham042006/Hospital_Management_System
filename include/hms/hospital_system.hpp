@@ -31,7 +31,9 @@ struct PatientSearchResult {
 
 class HospitalSystem {
 public:
-    explicit HospitalSystem(const std::vector<InitialAccount>& initialAccounts);
+    explicit HospitalSystem(
+        const std::vector<InitialAccount>& initialAccounts,
+        const std::optional<std::string>& patientJournalPath = std::nullopt);
 
     std::optional<Session> login(const std::string& username,
                                  const std::string& password) const;

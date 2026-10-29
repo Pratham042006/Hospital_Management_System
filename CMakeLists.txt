@@ -64,3 +64,7 @@ add_test(NAME appointment_modification_tests COMMAND appointment_modification_te
 add_executable(usability_tests tests/test_usability.cpp)
 target_link_libraries(usability_tests PRIVATE hms_core)
 add_test(NAME usability_tests COMMAND usability_tests)
+
+add_executable(persistence_performance_tests tests/test_persistence_performance.cpp)
+target_link_libraries(persistence_performance_tests PRIVATE hms_core)
+add_test(NAME persistence_performance_tests COMMAND persistence_performance_tests)
