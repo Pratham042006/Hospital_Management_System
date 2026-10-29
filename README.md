@@ -12,6 +12,7 @@ This branch contains the C++17 Sprint 1 work assigned to Pratham Mudakavi.
 - **FR-06 — Appointment Scheduling:** schedule against existing patients, doctors, and availability with real-date, time, and conflict validation.
 - **FR-07 — Appointment Modification:** atomically reschedule or cancel active appointments while retaining cancelled history.
 - **NFR-01 — Performance:** in-memory indexes for patient IDs and contact fields plus a 10,000-patient search test with a three-second limit.
+- **NFR-02 — Usability:** role-appropriate menus, consistent navigation, corrective errors, operation confirmations, and a representative workflow checklist.
 - **NFR-04 — Security:** non-forgeable sessions, administrator-only account creation, hidden password entry, and role-scoped patient views.
 
 ## Build and test

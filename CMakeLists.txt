@@ -60,3 +60,7 @@ add_test(NAME appointment_scheduling_tests COMMAND appointment_scheduling_tests)
 add_executable(appointment_modification_tests tests/test_appointment_modification.cpp)
 target_link_libraries(appointment_modification_tests PRIVATE hms_core)
 add_test(NAME appointment_modification_tests COMMAND appointment_modification_tests)
+
+add_executable(usability_tests tests/test_usability.cpp)
+target_link_libraries(usability_tests PRIVATE hms_core)
+add_test(NAME usability_tests COMMAND usability_tests)

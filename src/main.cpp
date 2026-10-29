@@ -118,8 +118,12 @@ void searchPatients(const hms::HospitalSystem& system, const hms::Session& sessi
         return;
     }
 
+    if (option != "2" && option != "3") {
+        std::cout << "Invalid search choice. Enter 1, 2, or 3.\n";
+        return;
+    }
     const auto matches = option == "2" ? system.searchPatientsByName(session, query)
-                                         : system.searchPatientsByContact(session, query);
+                                        : system.searchPatientsByContact(session, query);
     if (matches.empty()) {
         std::cout << "No patients matched the search.\n";
         return;
@@ -199,6 +203,10 @@ void doctorMenu(hms::HospitalSystem& system,
         std::cout << "Doctor updated successfully.\n";
         return;
     }
+    if (choice != "3" && choice != "4") {
+        std::cout << "Invalid doctor choice. Choose one of the displayed options.\n";
+        return;
+    }
     const auto doctors = choice == "3" ? system.searchDoctors(session, prompt("Search: "))
                                          : system.listDoctors(session);
     if (doctors.empty()) std::cout << "No doctors matched.\n";
@@ -248,6 +256,10 @@ void appointmentMenu(hms::HospitalSystem& system,
     if (choice == "5" && canManage) {
         printAppointment(system.cancelAppointment(session, prompt("Appointment ID: ")));
         std::cout << "Appointment cancelled successfully and retained in history.\n";
+        return;
+    }
+    if (choice != "3") {
+        std::cout << "Invalid appointment choice. Choose one of the displayed options.\n";
         return;
     }
     const auto appointments = system.listAppointments(session);
@@ -320,5 +332,6 @@ int main() {
             std::cout << "Operation failed: " << error.what() << '\n';
         }
     }
+    std::cout << "Goodbye. All completed in-memory operations were closed safely.\n";
     return 0;
 }
