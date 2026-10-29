@@ -47,34 +47,43 @@ Appointment AppointmentRepository::schedule(const AppointmentDraft& draft) {
     Appointment appointment{generateAppointmentId(), trim(draft.patientId), trim(draft.doctorId),
                             trim(draft.date), trim(draft.time), trim(draft.purpose),
                             AppointmentStatus::Scheduled};
-    if (appointment.patientId.empty() || appointment.doctorId.empty()) {
-        throw std::invalid_argument("Patient ID and Doctor ID are required.");
-    }
-    if (!isValidDate(appointment.date)) {
-        throw std::invalid_argument("Appointment date must be a real YYYY-MM-DD date.");
-    }
-    if (isPastDate(appointment.date)) {
-        throw std::invalid_argument("Appointment date cannot be in the past.");
-    }
-    if (!isValidTime(appointment.time)) {
-        throw std::invalid_argument("Appointment time must be a valid HH:MM time.");
-    }
-    if (appointment.purpose.empty()) {
-        throw std::invalid_argument("Appointment purpose is required.");
-    }
-    const auto conflict = std::find_if(
-        appointments_.begin(), appointments_.end(), [&](const Appointment& existing) {
-            return existing.status == AppointmentStatus::Scheduled &&
-                   existing.date == appointment.date && existing.time == appointment.time &&
-                   (existing.patientId == appointment.patientId ||
-                    existing.doctorId == appointment.doctorId);
-        });
-    if (conflict != appointments_.end()) {
-        throw std::invalid_argument("The patient or doctor already has an appointment at this time.");
-    }
+    validateCandidate(appointment);
     const std::size_t index = appointments_.size();
     appointments_.push_back(appointment);
     idIndex_[appointment.id] = index;
+    return appointment;
+}
+
+Appointment AppointmentRepository::reschedule(const std::string& appointmentId,
+                                               const AppointmentUpdate& update) {
+    const auto located = idIndex_.find(appointmentId);
+    if (located == idIndex_.end()) {
+        throw std::invalid_argument("Appointment ID was not found: " + appointmentId);
+    }
+    const Appointment& current = appointments_.at(located->second);
+    if (current.status != AppointmentStatus::Scheduled) {
+        throw std::invalid_argument("Only scheduled appointments can be modified.");
+    }
+    Appointment candidate = current;
+    if (update.doctorId) candidate.doctorId = trim(*update.doctorId);
+    if (update.date) candidate.date = trim(*update.date);
+    if (update.time) candidate.time = trim(*update.time);
+    if (update.purpose) candidate.purpose = trim(*update.purpose);
+    validateCandidate(candidate, appointmentId);
+    appointments_.at(located->second) = candidate;
+    return candidate;
+}
+
+Appointment AppointmentRepository::cancel(const std::string& appointmentId) {
+    const auto located = idIndex_.find(appointmentId);
+    if (located == idIndex_.end()) {
+        throw std::invalid_argument("Appointment ID was not found: " + appointmentId);
+    }
+    Appointment& appointment = appointments_.at(located->second);
+    if (appointment.status != AppointmentStatus::Scheduled) {
+        throw std::invalid_argument("Only scheduled appointments can be cancelled.");
+    }
+    appointment.status = AppointmentStatus::Cancelled;
     return appointment;
 }
 
@@ -122,6 +131,37 @@ std::string AppointmentRepository::trim(const std::string& value) {
         return std::isspace(ch) != 0;
     }).base();
     return std::string(first, last);
+}
+
+void AppointmentRepository::validateCandidate(
+    const Appointment& appointment,
+    const std::optional<std::string>& ignoredAppointmentId) const {
+    if (appointment.patientId.empty() || appointment.doctorId.empty()) {
+        throw std::invalid_argument("Patient ID and Doctor ID are required.");
+    }
+    if (!isValidDate(appointment.date)) {
+        throw std::invalid_argument("Appointment date must be a real YYYY-MM-DD date.");
+    }
+    if (isPastDate(appointment.date)) {
+        throw std::invalid_argument("Appointment date cannot be in the past.");
+    }
+    if (!isValidTime(appointment.time)) {
+        throw std::invalid_argument("Appointment time must be a valid HH:MM time.");
+    }
+    if (appointment.purpose.empty()) {
+        throw std::invalid_argument("Appointment purpose is required.");
+    }
+    const auto conflict = std::find_if(
+        appointments_.begin(), appointments_.end(), [&](const Appointment& existing) {
+            return (!ignoredAppointmentId || existing.id != *ignoredAppointmentId) &&
+                   existing.status == AppointmentStatus::Scheduled &&
+                   existing.date == appointment.date && existing.time == appointment.time &&
+                   (existing.patientId == appointment.patientId ||
+                    existing.doctorId == appointment.doctorId);
+        });
+    if (conflict != appointments_.end()) {
+        throw std::invalid_argument("The patient or doctor already has an appointment at this time.");
+    }
 }
 
 std::string AppointmentRepository::generateAppointmentId() {

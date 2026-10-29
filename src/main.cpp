@@ -216,7 +216,8 @@ void appointmentMenu(hms::HospitalSystem& system,
                      const hms::Session& session,
                      const std::vector<std::string>& actions) {
     const bool canManage = hasAction(actions, "Manage appointments");
-    std::cout << (canManage ? "1) Schedule  " : "") << "2) Find  3) List  0) Back\n";
+    std::cout << (canManage ? "1) Schedule  4) Reschedule  5) Cancel  " : "")
+              << "2) Find  3) List  0) Back\n";
     const std::string choice = prompt("Appointment choice: ");
     if (choice == "0") return;
     if (choice == "1" && canManage) {
@@ -231,6 +232,22 @@ void appointmentMenu(hms::HospitalSystem& system,
         const auto appointment = system.findAppointmentById(session, prompt("Appointment ID: "));
         if (appointment) printAppointment(*appointment);
         else std::cout << "No appointment matched that ID.\n";
+        return;
+    }
+    if (choice == "4" && canManage) {
+        const std::string id = prompt("Appointment ID: ");
+        hms::AppointmentUpdate update;
+        update.doctorId = optionalPrompt("Doctor ID");
+        update.date = optionalPrompt("Date (YYYY-MM-DD)");
+        update.time = optionalPrompt("Time (HH:MM)");
+        update.purpose = optionalPrompt("Purpose");
+        printAppointment(system.rescheduleAppointment(session, id, update));
+        std::cout << "Appointment rescheduled successfully.\n";
+        return;
+    }
+    if (choice == "5" && canManage) {
+        printAppointment(system.cancelAppointment(session, prompt("Appointment ID: ")));
+        std::cout << "Appointment cancelled successfully and retained in history.\n";
         return;
     }
     const auto appointments = system.listAppointments(session);

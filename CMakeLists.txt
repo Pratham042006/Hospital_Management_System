@@ -56,3 +56,7 @@ add_test(NAME doctor_tests COMMAND doctor_tests)
 add_executable(appointment_scheduling_tests tests/test_appointment_scheduling.cpp)
 target_link_libraries(appointment_scheduling_tests PRIVATE hms_core)
 add_test(NAME appointment_scheduling_tests COMMAND appointment_scheduling_tests)
+
+add_executable(appointment_modification_tests tests/test_appointment_modification.cpp)
+target_link_libraries(appointment_modification_tests PRIVATE hms_core)
+add_test(NAME appointment_modification_tests COMMAND appointment_modification_tests)

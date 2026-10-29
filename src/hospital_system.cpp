@@ -153,6 +153,38 @@ Appointment HospitalSystem::scheduleAppointment(
     return appointments_.schedule(draft);
 }
 
+Appointment HospitalSystem::rescheduleAppointment(
+    const Session& session,
+    const std::string& appointmentId,
+    const AppointmentUpdate& update) {
+    require(session, Permission::ManageAppointments);
+    const auto current = appointments_.findById(appointmentId);
+    if (!current) throw std::invalid_argument("Appointment ID was not found: " + appointmentId);
+    const std::string doctorId = update.doctorId ? *update.doctorId : current->doctorId;
+    const std::string date = update.date ? *update.date : current->date;
+    const std::string time = update.time ? *update.time : current->time;
+    if (!AppointmentRepository::isValidDate(date)) {
+        throw std::invalid_argument("Appointment date must be a real YYYY-MM-DD date.");
+    }
+    if (AppointmentRepository::isPastDate(date)) {
+        throw std::invalid_argument("Appointment date cannot be in the past.");
+    }
+    if (!AppointmentRepository::isValidTime(time)) {
+        throw std::invalid_argument("Appointment time must be a valid HH:MM time.");
+    }
+    if (!doctors_.findById(doctorId)) throw std::invalid_argument("Doctor ID does not exist.");
+    if (!doctors_.isAvailable(doctorId, date, time)) {
+        throw std::invalid_argument("The doctor is not available at the requested date and time.");
+    }
+    return appointments_.reschedule(appointmentId, update);
+}
+
+Appointment HospitalSystem::cancelAppointment(const Session& session,
+                                              const std::string& appointmentId) {
+    require(session, Permission::ManageAppointments);
+    return appointments_.cancel(appointmentId);
+}
+
 std::optional<Appointment> HospitalSystem::findAppointmentById(
     const Session& session,
     const std::string& appointmentId) const {
