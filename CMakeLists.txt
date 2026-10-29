@@ -13,7 +13,11 @@ add_library(hms_core
 )
 
 target_include_directories(hms_core PUBLIC include)
-target_compile_options(hms_core PRIVATE -Wall -Wextra -Wpedantic)
+if(MSVC)
+    target_compile_options(hms_core PRIVATE /W4 /permissive-)
+else()
+    target_compile_options(hms_core PRIVATE -Wall -Wextra -Wpedantic)
+endif()
 
 add_executable(hms src/main.cpp)
 target_link_libraries(hms PRIVATE hms_core)
@@ -38,3 +42,7 @@ add_test(NAME search_tests COMMAND search_tests)
 add_executable(performance_tests tests/test_performance.cpp)
 target_link_libraries(performance_tests PRIVATE hms_core)
 add_test(NAME performance_tests COMMAND performance_tests)
+
+add_executable(security_tests tests/test_security.cpp)
+target_link_libraries(security_tests PRIVATE hms_core)
+add_test(NAME security_tests COMMAND security_tests)

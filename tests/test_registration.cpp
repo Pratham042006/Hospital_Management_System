@@ -1,4 +1,4 @@
-#include "hms/hospital_system.hpp"
+#include "test_support.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -42,9 +42,9 @@ hms::PatientDraft patientDraft(int number) {
 }  // namespace
 
 int main() {
-    hms::HospitalSystem system;
-    const auto receptionist = *system.login("receptionist", "reception123");
-    const auto doctor = *system.login("doctor", "doctor123");
+    auto system = makeTestSystem();
+    const auto receptionist = *system.login("receptionist", "test-reception-password");
+    const auto doctor = *system.login("doctor", "test-doctor-password");
 
     const auto first = system.registerPatient(receptionist, patientDraft(1));
     const auto second = system.registerPatient(receptionist, patientDraft(2));

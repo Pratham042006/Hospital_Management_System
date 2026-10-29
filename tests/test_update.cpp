@@ -1,4 +1,4 @@
-#include "hms/hospital_system.hpp"
+#include "test_support.hpp"
 
 #include <iostream>
 #include <stdexcept>
@@ -39,9 +39,9 @@ hms::PatientDraft patientDraft(int number) {
 }  // namespace
 
 int main() {
-    hms::HospitalSystem system;
-    const auto administrator = *system.login("admin", "admin123");
-    const auto billing = *system.login("billing", "billing123");
+    auto system = makeTestSystem();
+    const auto administrator = *system.login("admin", "test-admin-password");
+    const auto billing = *system.login("billing", "test-billing-password");
     const auto original = system.registerPatient(administrator, patientDraft(1));
     const auto other = system.registerPatient(administrator, patientDraft(2));
 

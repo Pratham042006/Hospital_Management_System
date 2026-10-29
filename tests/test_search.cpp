@@ -1,4 +1,4 @@
-#include "hms/hospital_system.hpp"
+#include "test_support.hpp"
 
 #include <iostream>
 
@@ -26,8 +26,8 @@ hms::PatientDraft patientDraft(int number, const std::string& name) {
 }  // namespace
 
 int main() {
-    hms::HospitalSystem system;
-    const auto receptionist = *system.login("receptionist", "reception123");
+    auto system = makeTestSystem();
+    const auto receptionist = *system.login("receptionist", "test-reception-password");
     const auto first = system.registerPatient(receptionist, patientDraft(1, "Anita Rao"));
     system.registerPatient(receptionist, patientDraft(2, "Anil Rao"));
 

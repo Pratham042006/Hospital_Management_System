@@ -1,4 +1,4 @@
-#include "hms/auth.hpp"
+#include "test_support.hpp"
 
 #include <algorithm>
 #include <iostream>
@@ -23,30 +23,30 @@ bool contains(const std::vector<std::string>& values, const std::string& value) 
 }  // namespace
 
 int main() {
-    hms::AuthService auth;
-    const auto administrator = auth.authenticate("admin", "admin123");
-    const auto receptionist = auth.authenticate("receptionist", "reception123");
-    const auto doctor = auth.authenticate("doctor", "doctor123");
-    const auto billing = auth.authenticate("billing", "billing123");
+    auto system = makeTestSystem();
+    const auto administrator = system.login("admin", "test-admin-password");
+    const auto receptionist = system.login("receptionist", "test-reception-password");
+    const auto doctor = system.login("doctor", "test-doctor-password");
+    const auto billing = system.login("billing", "test-billing-password");
 
     CHECK(administrator && administrator->role == hms::Role::Administrator);
     CHECK(receptionist && receptionist->role == hms::Role::Receptionist);
     CHECK(doctor && doctor->role == hms::Role::Doctor);
     CHECK(billing && billing->role == hms::Role::BillingStaff);
-    CHECK(!auth.authenticate("admin", "incorrect"));
-    CHECK(!auth.authenticate("missing", "password"));
+    CHECK(!system.login("admin", "incorrect"));
+    CHECK(!system.login("missing", "password"));
 
-    CHECK(auth.isAllowed(*administrator, hms::Permission::ManageUsers));
-    CHECK(auth.isAllowed(*receptionist, hms::Permission::RegisterPatient));
-    CHECK(!auth.isAllowed(*doctor, hms::Permission::RegisterPatient));
-    CHECK(!auth.isAllowed(*billing, hms::Permission::UpdatePatient));
-
-    const auto administratorMenu = auth.availableActions(*administrator);
-    const auto doctorMenu = auth.availableActions(*doctor);
+    const auto administratorMenu = system.menuFor(*administrator);
+    const auto receptionistMenu = system.menuFor(*receptionist);
+    const auto doctorMenu = system.menuFor(*doctor);
+    const auto billingMenu = system.menuFor(*billing);
     CHECK(administratorMenu.size() == 6);
+    CHECK(contains(receptionistMenu, "Register patient"));
     CHECK(doctorMenu.size() == 2);
     CHECK(contains(doctorMenu, "Search patients"));
     CHECK(contains(doctorMenu, "View clinical data"));
+    CHECK(!contains(doctorMenu, "Register patient"));
+    CHECK(!contains(billingMenu, "Update patient"));
 
     if (failures != 0) {
         std::cerr << failures << " authentication test assertion(s) failed.\n";
