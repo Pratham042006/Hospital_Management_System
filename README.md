@@ -14,6 +14,7 @@ This branch contains the C++17 Sprint 1 work assigned to Pratham Mudakavi.
 - **NFR-01 — Performance:** indexed searches plus an append-only patient journal tested with a 10,000-patient write, reload, update, and search workload under three seconds.
 - **NFR-02 — Usability:** role-appropriate menus, consistent navigation, corrective errors, operation confirmations, and a representative workflow checklist.
 - **NFR-04 — Security:** non-forgeable sessions, administrator-only account creation, hidden password entry, and role-scoped patient views.
+- **NFR-05 — Maintainability:** patient validation is separated from persistence, and console interaction is separated from the application entry point.
 
 ## Build and test
 
@@ -42,7 +43,11 @@ Sign in as `admin`, then use the administrator menu to create the other role acc
 
 ## Project structure
 
-- `include/hms/` — public domain and service interfaces
-- `src/` — authentication, authorization, patient repository, application service, and CLI
+- `include/hms/` — public domain, service, validation, and console interfaces
+- `src/auth.cpp` — authentication, roles, and permission policy
+- `src/patient_repository.cpp` — patient storage, indexes, persistence, and repository operations
+- `src/patient_validation.cpp` — patient normalization and validation rules
+- `src/hospital_system.cpp` — application workflows and authorization checks
+- `src/console_app.cpp` — console prompts, menus, and output; `src/main.cpp` is the entry point
 - `tests/` — separate tests for each Sprint 1 requirement
 

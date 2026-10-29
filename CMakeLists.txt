@@ -11,6 +11,7 @@ add_library(hms_core
     src/auth.cpp
     src/doctor_repository.cpp
     src/patient_repository.cpp
+    src/patient_validation.cpp
     src/hospital_system.cpp
 )
 
@@ -21,7 +22,10 @@ else()
     target_compile_options(hms_core PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-add_executable(hms src/main.cpp)
+add_executable(hms
+    src/main.cpp
+    src/console_app.cpp
+)
 target_link_libraries(hms PRIVATE hms_core)
 
 enable_testing()
@@ -68,3 +72,4 @@ add_test(NAME usability_tests COMMAND usability_tests)
 add_executable(persistence_performance_tests tests/test_persistence_performance.cpp)
 target_link_libraries(persistence_performance_tests PRIVATE hms_core)
 add_test(NAME persistence_performance_tests COMMAND persistence_performance_tests)
+
