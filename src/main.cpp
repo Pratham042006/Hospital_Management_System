@@ -5,6 +5,7 @@
 #include <iostream>
 #include <optional>
 #include <string>
+#include <sstream>
 #include <vector>
 
 #if defined(_WIN32)
@@ -150,6 +151,60 @@ void addUser(hms::HospitalSystem& system, const hms::Session& session) {
     std::cout << "User created successfully.\n";
 }
 
+std::vector<std::string> splitSlots(const std::string& value) {
+    std::vector<std::string> slots;
+    std::istringstream input(value);
+    std::string slot;
+    while (std::getline(input, slot, ',')) {
+        if (!slot.empty()) slots.push_back(slot);
+    }
+    return slots;
+}
+
+void printDoctor(const hms::Doctor& doctor) {
+    std::cout << doctor.id << " | " << doctor.fullName << " | " << doctor.specialization
+              << " | " << doctor.department << " | " << doctor.phone;
+    for (const auto& slot : doctor.availability) std::cout << " | " << slot;
+    std::cout << '\n';
+}
+
+void doctorMenu(hms::HospitalSystem& system,
+                const hms::Session& session,
+                const std::vector<std::string>& actions) {
+    const bool canManage = hasAction(actions, "Manage doctors");
+    std::cout << (canManage ? "1) Add  2) Update  " : "")
+              << "3) Search  4) List  0) Back\n";
+    const std::string choice = prompt("Doctor choice: ");
+    if (choice == "0") return;
+    if (choice == "1" && canManage) {
+        hms::DoctorDraft draft{
+            prompt("Full name: "), prompt("Specialization: "), prompt("Department: "),
+            prompt("Phone: "), prompt("Email: "),
+            splitSlots(prompt("Availability slots (YYYY-MM-DD HH:MM, comma-separated): "))};
+        const auto doctor = system.addDoctor(session, draft);
+        std::cout << "Doctor created successfully with ID " << doctor.id << ".\n";
+        return;
+    }
+    if (choice == "2" && canManage) {
+        const std::string id = prompt("Doctor ID: ");
+        hms::DoctorUpdate update;
+        update.fullName = optionalPrompt("Full name");
+        update.specialization = optionalPrompt("Specialization");
+        update.department = optionalPrompt("Department");
+        update.phone = optionalPrompt("Phone");
+        update.email = optionalPrompt("Email");
+        const std::string slots = prompt("Availability slots (blank keeps current): ");
+        if (!slots.empty()) update.availability = splitSlots(slots);
+        printDoctor(system.updateDoctor(session, id, update));
+        std::cout << "Doctor updated successfully.\n";
+        return;
+    }
+    const auto doctors = choice == "3" ? system.searchDoctors(session, prompt("Search: "))
+                                         : system.listDoctors(session);
+    if (doctors.empty()) std::cout << "No doctors matched.\n";
+    for (const auto& doctor : doctors) printDoctor(doctor);
+}
+
 }  // namespace
 
 int main() {
@@ -181,6 +236,9 @@ int main() {
         if (hasAction(actions, "Update patient")) std::cout << "2) Update patient  ";
         if (hasAction(actions, "Search patients")) std::cout << "3) Search patients  ";
         if (hasAction(actions, "Manage users")) std::cout << "4) Add user  ";
+        if (hasAction(actions, "Manage doctors") || hasAction(actions, "View doctors")) {
+            std::cout << "5) Doctors  ";
+        }
         std::cout << "0) Exit\n";
         const std::string choice = prompt("Choice: ");
         if (choice == "0") break;
@@ -194,6 +252,9 @@ int main() {
                 searchPatients(system, *session);
             } else if (choice == "4" && hasAction(actions, "Manage users")) {
                 addUser(system, *session);
+            } else if (choice == "5" &&
+                       (hasAction(actions, "Manage doctors") || hasAction(actions, "View doctors"))) {
+                doctorMenu(system, *session, actions);
             } else {
                 std::cout << "This action is not available for your role.\n";
             }
