@@ -2,6 +2,46 @@
 
 namespace hms {
 
+namespace {
+
+PatientSearchResult projectPatient(const Patient& patient, Role role) {
+    PatientSearchResult result;
+    result.id = patient.id;
+    result.fullName = patient.fullName;
+
+    switch (role) {
+        case Role::Administrator:
+            result.dateOfBirth = patient.dateOfBirth;
+            result.gender = patient.gender;
+            result.phone = patient.phone;
+            result.email = patient.email;
+            result.address = patient.address;
+            result.emergencyContactName = patient.emergencyContactName;
+            result.emergencyContactPhone = patient.emergencyContactPhone;
+            break;
+        case Role::Receptionist:
+            result.dateOfBirth = patient.dateOfBirth;
+            result.phone = patient.phone;
+            result.email = patient.email;
+            result.address = patient.address;
+            break;
+        case Role::Doctor:
+            result.dateOfBirth = patient.dateOfBirth;
+            result.gender = patient.gender;
+            result.emergencyContactName = patient.emergencyContactName;
+            result.emergencyContactPhone = patient.emergencyContactPhone;
+            break;
+        case Role::BillingStaff:
+            break;
+    }
+    return result;
+}
+
+}  // namespace
+
+HospitalSystem::HospitalSystem(const std::vector<InitialAccount>& initialAccounts)
+    : auth_(initialAccounts) {}
+
 std::optional<Session> HospitalSystem::login(const std::string& username,
                                              const std::string& password) const {
     return auth_.authenticate(username, password);
@@ -9,6 +49,14 @@ std::optional<Session> HospitalSystem::login(const std::string& username,
 
 std::vector<std::string> HospitalSystem::menuFor(const Session& session) const {
     return auth_.availableActions(session);
+}
+
+bool HospitalSystem::addUser(const Session& session,
+                             const std::string& username,
+                             const std::string& password,
+                             Role role) {
+    require(session, Permission::ManageUsers);
+    return auth_.addUser(username, password, role);
 }
 
 Patient HospitalSystem::registerPatient(const Session& session, const PatientDraft& draft) {
@@ -23,25 +71,35 @@ Patient HospitalSystem::updatePatient(const Session& session,
     return patients_.updatePatient(patientId, update);
 }
 
-std::optional<Patient> HospitalSystem::searchPatientById(
+std::optional<PatientSearchResult> HospitalSystem::searchPatientById(
     const Session& session,
     const std::string& patientId) const {
     require(session, Permission::SearchPatient);
-    return patients_.findById(patientId);
+    const auto patient = patients_.findById(patientId);
+    if (!patient) return std::nullopt;
+    return projectPatient(*patient, session.role);
 }
 
-std::vector<Patient> HospitalSystem::searchPatientsByName(
+std::vector<PatientSearchResult> HospitalSystem::searchPatientsByName(
     const Session& session,
     const std::string& name) const {
     require(session, Permission::SearchPatient);
-    return patients_.findByName(name);
+    std::vector<PatientSearchResult> results;
+    for (const auto& patient : patients_.findByName(name)) {
+        results.push_back(projectPatient(patient, session.role));
+    }
+    return results;
 }
 
-std::vector<Patient> HospitalSystem::searchPatientsByContact(
+std::vector<PatientSearchResult> HospitalSystem::searchPatientsByContact(
     const Session& session,
     const std::string& contact) const {
     require(session, Permission::SearchPatient);
-    return patients_.findByContact(contact);
+    std::vector<PatientSearchResult> results;
+    for (const auto& patient : patients_.findByContact(contact)) {
+        results.push_back(projectPatient(patient, session.role));
+    }
+    return results;
 }
 
 std::size_t HospitalSystem::patientCount() const noexcept {

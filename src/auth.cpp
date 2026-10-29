@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <stdexcept>
 #include <utility>
 
 namespace hms {
@@ -62,11 +63,12 @@ std::string toString(Role role) {
     return "Unknown";
 }
 
-AuthService::AuthService() {
-    addUser("admin", "admin123", Role::Administrator);
-    addUser("receptionist", "reception123", Role::Receptionist);
-    addUser("doctor", "doctor123", Role::Doctor);
-    addUser("billing", "billing123", Role::BillingStaff);
+AuthService::AuthService(const std::vector<InitialAccount>& initialAccounts) {
+    for (const auto& account : initialAccounts) {
+        if (!addUser(account.username, account.password, account.role)) {
+            throw std::invalid_argument("Initial accounts must have unique usernames and passwords of at least 8 characters.");
+        }
+    }
 }
 
 bool AuthService::addUser(const std::string& username,

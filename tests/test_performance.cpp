@@ -1,4 +1,4 @@
-#include "hms/hospital_system.hpp"
+#include "test_support.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -27,8 +27,8 @@ std::string patientId(int number) {
 }  // namespace
 
 int main() {
-    hms::HospitalSystem system;
-    const auto administrator = *system.login("admin", "admin123");
+    auto system = makeTestSystem();
+    const auto administrator = *system.login("admin", "test-admin-password");
     constexpr int patientCount = 10000;
 
     for (int number = 1; number <= patientCount; ++number) {

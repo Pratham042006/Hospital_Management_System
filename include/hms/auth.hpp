@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace hms {
@@ -24,18 +25,34 @@ enum class Permission {
     ManageBilling,
 };
 
-struct Session {
+struct InitialAccount {
     std::string username;
+    std::string password;
     Role role;
+};
+
+class HospitalSystem;
+
+struct Session {
+    Session(const Session&) = default;
+    Session(Session&&) = default;
+
+    const std::string username;
+    const Role role;
+
+private:
+    Session(std::string authenticatedUsername, Role authenticatedRole)
+        : username(std::move(authenticatedUsername)), role(authenticatedRole) {}
+
+    friend class AuthService;
 };
 
 std::string toString(Role role);
 
 class AuthService {
 public:
-    AuthService();
+    explicit AuthService(const std::vector<InitialAccount>& initialAccounts);
 
-    bool addUser(const std::string& username, const std::string& plainTextPassword, Role role);
     std::optional<Session> authenticate(const std::string& username,
                                         const std::string& plainTextPassword) const;
     bool isAllowed(const Session& session, Permission permission) const;
@@ -46,6 +63,10 @@ private:
         std::uint64_t passwordHash;
         Role role;
     };
+
+    friend class HospitalSystem;
+
+    bool addUser(const std::string& username, const std::string& plainTextPassword, Role role);
 
     std::unordered_map<std::string, Account> accounts_;
 

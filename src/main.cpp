@@ -1,8 +1,21 @@
 #include "hms/hospital_system.hpp"
 
+#include <algorithm>
+#include <cstdlib>
 #include <iostream>
 #include <optional>
 #include <string>
+#include <vector>
+
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#else
+#include <termios.h>
+#include <unistd.h>
+#endif
 
 namespace {
 
@@ -11,6 +24,38 @@ std::string prompt(const std::string& label) {
     std::string value;
     std::getline(std::cin, value);
     return value;
+}
+
+std::string promptPassword(const std::string& label) {
+    std::cout << label << std::flush;
+    std::string password;
+
+#if defined(_WIN32)
+    HANDLE input = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD originalMode = 0;
+    if (input != INVALID_HANDLE_VALUE && GetConsoleMode(input, &originalMode) != 0) {
+        if (SetConsoleMode(input, originalMode & ~ENABLE_ECHO_INPUT) == 0) return {};
+        std::getline(std::cin, password);
+        SetConsoleMode(input, originalMode);
+        std::cout << '\n';
+        return password;
+    }
+#else
+    if (isatty(STDIN_FILENO)) {
+        termios originalMode{};
+        if (tcgetattr(STDIN_FILENO, &originalMode) != 0) return {};
+        termios hiddenMode = originalMode;
+        hiddenMode.c_lflag &= static_cast<tcflag_t>(~ECHO);
+        if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &hiddenMode) != 0) return {};
+        std::getline(std::cin, password);
+        const bool restored = tcsetattr(STDIN_FILENO, TCSAFLUSH, &originalMode) == 0;
+        std::cout << '\n';
+        return restored ? password : std::string{};
+    }
+#endif
+
+    std::getline(std::cin, password);
+    return password;
 }
 
 hms::PatientDraft readPatientDraft() {
@@ -47,10 +92,18 @@ void updatePatient(hms::HospitalSystem& system, const hms::Session& session) {
     std::cout << "Patient updated successfully. ID remains " << patient.id << ".\n";
 }
 
-void printPatient(const hms::Patient& patient) {
-    std::cout << patient.id << " | " << patient.fullName << " | " << patient.dateOfBirth
-              << " | " << patient.gender << " | " << patient.phone << " | "
-              << patient.email << " | " << patient.address << '\n';
+void printPatient(const hms::PatientSearchResult& patient) {
+    std::cout << patient.id << " | " << patient.fullName;
+    if (patient.dateOfBirth) std::cout << " | DOB: " << *patient.dateOfBirth;
+    if (patient.gender) std::cout << " | Gender: " << *patient.gender;
+    if (patient.phone) std::cout << " | Phone: " << *patient.phone;
+    if (patient.email) std::cout << " | Email: " << *patient.email;
+    if (patient.address) std::cout << " | Address: " << *patient.address;
+    if (patient.emergencyContactName && patient.emergencyContactPhone) {
+        std::cout << " | Emergency: " << *patient.emergencyContactName << " ("
+                  << *patient.emergencyContactPhone << ')';
+    }
+    std::cout << '\n';
 }
 
 void searchPatients(const hms::HospitalSystem& system, const hms::Session& session) {
@@ -73,41 +126,76 @@ void searchPatients(const hms::HospitalSystem& system, const hms::Session& sessi
     for (const auto& patient : matches) printPatient(patient);
 }
 
+bool hasAction(const std::vector<std::string>& actions, const std::string& action) {
+    return std::find(actions.begin(), actions.end(), action) != actions.end();
+}
+
+std::optional<hms::Role> roleFromChoice(const std::string& choice) {
+    if (choice == "1") return hms::Role::Administrator;
+    if (choice == "2") return hms::Role::Receptionist;
+    if (choice == "3") return hms::Role::Doctor;
+    if (choice == "4") return hms::Role::BillingStaff;
+    return std::nullopt;
+}
+
+void addUser(hms::HospitalSystem& system, const hms::Session& session) {
+    const std::string username = prompt("New username: ");
+    const std::string password = promptPassword("New password: ");
+    std::cout << "Role: 1) Administrator  2) Receptionist  3) Doctor  4) Billing staff\n";
+    const auto role = roleFromChoice(prompt("Choose role: "));
+    if (!role || !system.addUser(session, username, password, *role)) {
+        std::cout << "User not created. Check the role, username, and password length.\n";
+        return;
+    }
+    std::cout << "User created successfully.\n";
+}
+
 }  // namespace
 
 int main() {
-    hms::HospitalSystem system;
+    const char* configuredPassword = std::getenv("HMS_ADMIN_PASSWORD");
+    if (configuredPassword == nullptr || std::string(configuredPassword).size() < 8) {
+        std::cerr << "Set HMS_ADMIN_PASSWORD to at least 8 characters before starting HMS.\n";
+        return 1;
+    }
+    hms::HospitalSystem system({{"admin", configuredPassword, hms::Role::Administrator}});
     std::cout << "Hospital Management System\n";
     const std::string username = prompt("Username: ");
-    const std::string password = prompt("Password: ");
+    const std::string password = promptPassword("Password: ");
     const auto session = system.login(username, password);
     if (!session) {
         std::cerr << "Login failed: invalid username or password.\n";
         return 1;
     }
 
+    const auto actions = system.menuFor(*session);
     std::cout << "Welcome, " << session->username << " (" << hms::toString(session->role)
               << ").\nAvailable actions:\n";
-    for (const auto& action : system.menuFor(*session)) {
+    for (const auto& action : actions) {
         std::cout << " - " << action << '\n';
     }
 
     while (true) {
-        const std::string choice = prompt(
-            "\n1) Register patient  2) Update patient  3) Search patients  0) Exit\nChoice: ");
+        std::cout << '\n';
+        if (hasAction(actions, "Register patient")) std::cout << "1) Register patient  ";
+        if (hasAction(actions, "Update patient")) std::cout << "2) Update patient  ";
+        if (hasAction(actions, "Search patients")) std::cout << "3) Search patients  ";
+        if (hasAction(actions, "Manage users")) std::cout << "4) Add user  ";
+        std::cout << "0) Exit\n";
+        const std::string choice = prompt("Choice: ");
         if (choice == "0") break;
-        if (choice != "1" && choice != "2" && choice != "3") {
-            std::cout << "Unknown menu option.\n";
-            continue;
-        }
         try {
-            if (choice == "1") {
+            if (choice == "1" && hasAction(actions, "Register patient")) {
                 const auto patient = system.registerPatient(*session, readPatientDraft());
                 std::cout << "Patient registered successfully with ID " << patient.id << ".\n";
-            } else if (choice == "2") {
+            } else if (choice == "2" && hasAction(actions, "Update patient")) {
                 updatePatient(system, *session);
-            } else {
+            } else if (choice == "3" && hasAction(actions, "Search patients")) {
                 searchPatients(system, *session);
+            } else if (choice == "4" && hasAction(actions, "Manage users")) {
+                addUser(system, *session);
+            } else {
+                std::cout << "This action is not available for your role.\n";
             }
         } catch (const std::exception& error) {
             std::cout << "Operation failed: " << error.what() << '\n';
