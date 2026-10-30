@@ -81,3 +81,7 @@ add_executable(security_boundary_tests tests/test_security_boundaries.cpp)
 target_link_libraries(security_boundary_tests PRIVATE hms_core)
 add_test(NAME security_boundary_tests COMMAND security_boundary_tests)
 
+add_executable(appointment_conflict_tests tests/test_appointment_conflicts.cpp)
+target_link_libraries(appointment_conflict_tests PRIVATE hms_core)
+add_test(NAME appointment_conflict_tests COMMAND appointment_conflict_tests)
+
