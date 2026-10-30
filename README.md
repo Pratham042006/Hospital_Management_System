@@ -1,5 +1,7 @@
 # Hospital Management System
 
+[![build-and-test](https://github.com/Pratham042006/Hospital_Management_System/actions/workflows/ci.yml/badge.svg)](https://github.com/Pratham042006/Hospital_Management_System/actions/workflows/ci.yml)
+
 This repository contains the C++17 Sprint 1 release developed by Team 1 (Pratham P Mudakavi, Pratham P Shetty, Prathik M Nambiar, and Pratik Patil).
 
 ## Implemented requirements
@@ -18,6 +20,18 @@ This repository contains the C++17 Sprint 1 release developed by Team 1 (Pratham
 - **NFR-06 — Portability:** cross-platform CMake build configuration and automated GitHub Actions verification across Ubuntu, macOS, and Windows.
 
 ## Build and test
+
+### Quick build using helper scripts
+
+```sh
+# On Linux / macOS:
+./scripts/build_unix.sh
+
+# On Windows:
+scripts\build_windows.bat
+```
+
+### Manual CMake build
 
 ```sh
 cmake -S . -B build
