@@ -1,45 +1,15 @@
 #include "hms/patient_repository.hpp"
+#include "hms/patient_validation.hpp"
 
-#include <algorithm>
-#include <cctype>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
-#include <regex>
 #include <sstream>
 #include <stdexcept>
 
 namespace hms {
 
 namespace {
-
-bool isLeapYear(int year) {
-    return (year % 400 == 0) || (year % 4 == 0 && year % 100 != 0);
-}
-
-bool isValidDate(const std::string& date) {
-    static const std::regex format(R"(^\d{4}-\d{2}-\d{2}$)");
-    if (!std::regex_match(date, format)) return false;
-
-    const int year = std::stoi(date.substr(0, 4));
-    const int month = std::stoi(date.substr(5, 2));
-    const int day = std::stoi(date.substr(8, 2));
-    if (year < 1900 || month < 1 || month > 12 || day < 1) return false;
-
-    const int daysInMonth[] = {
-        31, isLeapYear(year) ? 29 : 28, 31, 30, 31, 30,
-        31, 31, 30, 31, 30, 31,
-    };
-    return day <= daysInMonth[month - 1];
-}
-
-bool isValidEmail(const std::string& email) {
-    if (email.empty()) return true;
-    const auto at = email.find('@');
-    const auto dot = email.rfind('.');
-    return at != std::string::npos && at > 0 && dot != std::string::npos && dot > at + 1 &&
-           dot + 1 < email.size();
-}
 
 std::string hexEncode(const std::string& value) {
     static constexpr char digits[] = "0123456789ABCDEF";
@@ -90,17 +60,17 @@ PatientRepository::PatientRepository(const std::optional<std::string>& journalPa
 Patient PatientRepository::registerPatient(const PatientDraft& draft) {
     Patient patient{
         generatePatientId(),
-        trim(draft.fullName),
-        trim(draft.dateOfBirth),
-        trim(draft.gender),
-        trim(draft.phone),
-        trim(draft.email),
-        trim(draft.address),
-        trim(draft.emergencyContactName),
-        trim(draft.emergencyContactPhone),
+        validation::trim(draft.fullName),
+        validation::trim(draft.dateOfBirth),
+        validation::trim(draft.gender),
+        validation::trim(draft.phone),
+        validation::trim(draft.email),
+        validation::trim(draft.address),
+        validation::trim(draft.emergencyContactName),
+        validation::trim(draft.emergencyContactPhone),
     };
 
-    validate(patient);
+    validation::validatePatient(patient);
     ensureUniqueContacts(patient);
     appendToJournal(patient);
     const std::size_t index = patients_.size();
@@ -113,20 +83,20 @@ Patient PatientRepository::updatePatient(const std::string& patientId,
                                          const PatientUpdate& update) {
     const std::size_t index = indexForId(patientId);
     Patient candidate = patients_.at(index);
-    if (update.fullName) candidate.fullName = trim(*update.fullName);
-    if (update.dateOfBirth) candidate.dateOfBirth = trim(*update.dateOfBirth);
-    if (update.gender) candidate.gender = trim(*update.gender);
-    if (update.phone) candidate.phone = trim(*update.phone);
-    if (update.email) candidate.email = trim(*update.email);
-    if (update.address) candidate.address = trim(*update.address);
+    if (update.fullName) candidate.fullName = validation::trim(*update.fullName);
+    if (update.dateOfBirth) candidate.dateOfBirth = validation::trim(*update.dateOfBirth);
+    if (update.gender) candidate.gender = validation::trim(*update.gender);
+    if (update.phone) candidate.phone = validation::trim(*update.phone);
+    if (update.email) candidate.email = validation::trim(*update.email);
+    if (update.address) candidate.address = validation::trim(*update.address);
     if (update.emergencyContactName) {
-        candidate.emergencyContactName = trim(*update.emergencyContactName);
+        candidate.emergencyContactName = validation::trim(*update.emergencyContactName);
     }
     if (update.emergencyContactPhone) {
-        candidate.emergencyContactPhone = trim(*update.emergencyContactPhone);
+        candidate.emergencyContactPhone = validation::trim(*update.emergencyContactPhone);
     }
 
-    validate(candidate);
+    validation::validatePatient(candidate);
     ensureUniqueContacts(candidate, patientId);
     appendToJournal(candidate);
 
@@ -144,11 +114,11 @@ std::optional<Patient> PatientRepository::findById(const std::string& patientId)
 }
 
 std::vector<Patient> PatientRepository::findByName(const std::string& name) const {
-    const std::string query = normalizeText(name);
+    const std::string query = validation::normalizeText(name);
     std::vector<Patient> matches;
     if (query.empty()) return matches;
     for (const auto& patient : patients_) {
-        if (normalizeText(patient.fullName).find(query) != std::string::npos) {
+        if (validation::normalizeText(patient.fullName).find(query) != std::string::npos) {
             matches.push_back(patient);
         }
     }
@@ -156,8 +126,8 @@ std::vector<Patient> PatientRepository::findByName(const std::string& name) cons
 }
 
 std::vector<Patient> PatientRepository::findByContact(const std::string& contact) const {
-    const std::string phone = normalizePhone(contact);
-    const std::string email = normalizeText(contact);
+    const std::string phone = validation::normalizePhone(contact);
+    const std::string email = validation::normalizeText(contact);
     std::vector<Patient> matches;
 
     if (!phone.empty()) {
@@ -181,54 +151,6 @@ std::size_t PatientRepository::size() const noexcept {
     return patients_.size();
 }
 
-std::string PatientRepository::trim(const std::string& value) {
-    const auto first = std::find_if_not(value.begin(), value.end(), [](unsigned char ch) {
-        return std::isspace(ch) != 0;
-    });
-    if (first == value.end()) return {};
-    const auto last = std::find_if_not(value.rbegin(), value.rend(), [](unsigned char ch) {
-        return std::isspace(ch) != 0;
-    }).base();
-    return std::string(first, last);
-}
-
-std::string PatientRepository::normalizeText(const std::string& value) {
-    std::string normalized = trim(value);
-    std::transform(normalized.begin(), normalized.end(), normalized.begin(), [](unsigned char ch) {
-        return static_cast<char>(std::tolower(ch));
-    });
-    return normalized;
-}
-
-std::string PatientRepository::normalizePhone(const std::string& value) {
-    std::string normalized;
-    for (const unsigned char ch : value) {
-        if (std::isdigit(ch) != 0) normalized.push_back(static_cast<char>(ch));
-    }
-    return normalized;
-}
-
-void PatientRepository::validate(const Patient& patient) {
-    if (patient.fullName.empty()) throw std::invalid_argument("Patient name is required.");
-    if (!isValidDate(patient.dateOfBirth)) {
-        throw std::invalid_argument("Date of birth must be a valid YYYY-MM-DD date.");
-    }
-    if (patient.gender.empty()) throw std::invalid_argument("Gender is required.");
-    const std::string phone = normalizePhone(patient.phone);
-    if (phone.size() < 7 || phone.size() > 15) {
-        throw std::invalid_argument("Phone number must contain 7 to 15 digits.");
-    }
-    if (!isValidEmail(patient.email)) throw std::invalid_argument("Email address is invalid.");
-    if (patient.address.empty()) throw std::invalid_argument("Address is required.");
-    if (patient.emergencyContactName.empty()) {
-        throw std::invalid_argument("Emergency contact name is required.");
-    }
-    const std::string emergencyPhone = normalizePhone(patient.emergencyContactPhone);
-    if (emergencyPhone.size() < 7 || emergencyPhone.size() > 15) {
-        throw std::invalid_argument("Emergency contact phone must contain 7 to 15 digits.");
-    }
-}
-
 std::string PatientRepository::generatePatientId() {
     std::ostringstream id;
     id << 'P' << std::setw(6) << std::setfill('0') << nextPatientNumber_++;
@@ -246,8 +168,8 @@ std::size_t PatientRepository::indexForId(const std::string& patientId) const {
 void PatientRepository::ensureUniqueContacts(
     const Patient& patient,
     const std::optional<std::string>& ignoredPatientId) const {
-    const std::string phone = normalizePhone(patient.phone);
-    const std::string email = normalizeText(patient.email);
+    const std::string phone = validation::normalizePhone(patient.phone);
+    const std::string email = validation::normalizeText(patient.email);
     const auto phoneOwner = phoneIndex_.find(phone);
     if (phoneOwner != phoneIndex_.end() &&
         (!ignoredPatientId || phoneOwner->second != *ignoredPatientId)) {
@@ -264,14 +186,14 @@ void PatientRepository::ensureUniqueContacts(
 
 void PatientRepository::addToIndexes(const Patient& patient, std::size_t index) {
     idIndex_[patient.id] = index;
-    phoneIndex_[normalizePhone(patient.phone)] = patient.id;
-    const std::string email = normalizeText(patient.email);
+    phoneIndex_[validation::normalizePhone(patient.phone)] = patient.id;
+    const std::string email = validation::normalizeText(patient.email);
     if (!email.empty()) emailIndex_[email] = patient.id;
 }
 
 void PatientRepository::removeContactIndexes(const Patient& patient) {
-    phoneIndex_.erase(normalizePhone(patient.phone));
-    const std::string email = normalizeText(patient.email);
+    phoneIndex_.erase(validation::normalizePhone(patient.phone));
+    const std::string email = validation::normalizeText(patient.email);
     if (!email.empty()) emailIndex_.erase(email);
 }
 
@@ -314,7 +236,7 @@ void PatientRepository::loadJournal() {
         Patient patient{hexDecode(fields[1]), hexDecode(fields[2]), hexDecode(fields[3]),
                         hexDecode(fields[4]), hexDecode(fields[5]), hexDecode(fields[6]),
                         hexDecode(fields[7]), hexDecode(fields[8]), hexDecode(fields[9])};
-        validate(patient);
+        validation::validatePatient(patient);
         const auto existing = idIndex_.find(patient.id);
         if (existing == idIndex_.end()) {
             ensureUniqueContacts(patient);
@@ -342,3 +264,4 @@ void PatientRepository::loadJournal() {
 }
 
 }  // namespace hms
+
