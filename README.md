@@ -1,6 +1,6 @@
 # Hospital Management System
 
-This branch contains the C++17 Sprint 1 work assigned to Pratham Mudakavi.
+This repository contains the C++17 Sprint 1 release developed by Team 1 (Pratham P Mudakavi, Pratham P Shetty, Prathik M Nambiar, and Pratik Patil).
 
 ## Implemented requirements
 
@@ -15,6 +15,7 @@ This branch contains the C++17 Sprint 1 work assigned to Pratham Mudakavi.
 - **NFR-02 — Usability:** role-appropriate menus, consistent navigation, corrective errors, operation confirmations, and a representative workflow checklist.
 - **NFR-04 — Security:** non-forgeable sessions, administrator-only account creation, hidden password entry, and role-scoped patient views.
 - **NFR-05 — Maintainability:** patient validation is separated from persistence, and console interaction is separated from the application entry point.
+- **NFR-06 — Portability:** cross-platform CMake build configuration and automated GitHub Actions verification across Ubuntu, macOS, and Windows.
 
 ## Build and test
 
