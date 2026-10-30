@@ -77,3 +77,7 @@ add_executable(portability_tests tests/test_portability.cpp)
 target_link_libraries(portability_tests PRIVATE hms_core)
 add_test(NAME portability_tests COMMAND portability_tests)
 
+add_executable(security_boundary_tests tests/test_security_boundaries.cpp)
+target_link_libraries(security_boundary_tests PRIVATE hms_core)
+add_test(NAME security_boundary_tests COMMAND security_boundary_tests)
+
