@@ -73,3 +73,7 @@ add_executable(persistence_performance_tests tests/test_persistence_performance.
 target_link_libraries(persistence_performance_tests PRIVATE hms_core)
 add_test(NAME persistence_performance_tests COMMAND persistence_performance_tests)
 
+add_executable(portability_tests tests/test_portability.cpp)
+target_link_libraries(portability_tests PRIVATE hms_core)
+add_test(NAME portability_tests COMMAND portability_tests)
+

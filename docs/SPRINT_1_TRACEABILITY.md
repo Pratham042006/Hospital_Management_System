@@ -17,6 +17,6 @@ The status and test results below reflect the reported Sprint 1 completion: all 
 | NFR-02 | Usability and safe input handling | Console workflows and usability guidance | `tests/test_usability.cpp`; `docs/USABILITY_CHECKLIST.md` | Completed in Sprint 1 | Passed |
 | NFR-04 | Security and role-based access | Authentication and authorization paths | `tests/test_security.cpp` | Completed in Sprint 1 | Passed |
 | NFR-05 | Maintainability and module separation | `src/patient_validation.cpp`, `src/console_app.cpp` | Clean build & test suite isolation | Completed in Sprint 1 | Passed |
-| NFR-06 | Portability and cross-platform CI | CMake configuration and `.github/workflows/ci.yml` | 3-OS GitHub Actions workflow (Ubuntu, macOS, Windows) | Completed in Sprint 1 | Passed |
+| NFR-06 | Portability and cross-platform CI | CMake configuration and `.github/workflows/ci.yml` | `tests/test_portability.cpp`; 3-OS GitHub Actions workflow (Ubuntu, macOS, Windows) | Completed in Sprint 1 | Passed |
 
 Only requirements selected for Sprint 1 are included in this matrix. Features deferred to later sprints are recorded in [DEVIATIONS.md](DEVIATIONS.md).
