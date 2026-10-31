@@ -1,9 +1,11 @@
 #pragma once
 
+#include "hms/admission_repository.hpp"
 #include "hms/auth.hpp"
 #include "hms/appointment_repository.hpp"
 #include "hms/doctor_repository.hpp"
 #include "hms/patient_repository.hpp"
+#include "hms/room_repository.hpp"
 
 #include <optional>
 #include <stdexcept>
@@ -79,11 +81,30 @@ public:
         const std::string& appointmentId) const;
     std::vector<Appointment> listAppointments(const Session& session) const;
 
+    // FR-09: Room and Ward Management
+    Room addRoom(const Session& session, const RoomDraft& draft);
+    std::optional<Room> findRoomById(const Session& session, const std::string& roomId) const;
+    std::vector<Room> listAllRooms(const Session& session) const;
+    std::vector<Room> listAvailableRooms(const Session& session) const;
+
+    // FR-08 & FR-11: Admission and Discharge Management
+    Admission admitPatient(const Session& session, const AdmissionDraft& draft);
+    Admission dischargePatient(const Session& session,
+                               const std::string& admissionId,
+                               const std::string& dischargeDate,
+                               const std::string& dischargeSummary);
+    std::optional<Admission> findAdmissionById(const Session& session,
+                                               const std::string& admissionId) const;
+    std::vector<Admission> listActiveAdmissions(const Session& session) const;
+    std::vector<Admission> listAllAdmissions(const Session& session) const;
+
 private:
     AuthService auth_;
     PatientRepository patients_;
     DoctorRepository doctors_;
     AppointmentRepository appointments_;
+    RoomRepository rooms_;
+    AdmissionRepository admissions_;
 
     void require(const Session& session, Permission permission) const;
 };

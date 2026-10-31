@@ -199,6 +199,80 @@ std::vector<Appointment> HospitalSystem::listAppointments(const Session& session
     return appointments_.list();
 }
 
+Room HospitalSystem::addRoom(const Session& session, const RoomDraft& draft) {
+    require(session, Permission::ManageAdmissions);
+    return rooms_.addRoom(draft);
+}
+
+std::optional<Room> HospitalSystem::findRoomById(const Session& session, const std::string& roomId) const {
+    require(session, Permission::ViewAdmissions);
+    return rooms_.findRoomById(roomId);
+}
+
+std::vector<Room> HospitalSystem::listAllRooms(const Session& session) const {
+    require(session, Permission::ViewAdmissions);
+    return rooms_.listAllRooms();
+}
+
+std::vector<Room> HospitalSystem::listAvailableRooms(const Session& session) const {
+    require(session, Permission::ViewAdmissions);
+    return rooms_.listAvailableRooms();
+}
+
+Admission HospitalSystem::admitPatient(const Session& session, const AdmissionDraft& draft) {
+    require(session, Permission::ManageAdmissions);
+    if (!patients_.findById(draft.patientId)) {
+        throw std::invalid_argument("Cannot admit non-existent patient: " + draft.patientId);
+    }
+    if (!doctors_.findById(draft.doctorId)) {
+        throw std::invalid_argument("Cannot admit under non-existent attending doctor: " + draft.doctorId);
+    }
+    const auto room = rooms_.findRoomById(draft.roomId);
+    if (!room) {
+        throw std::invalid_argument("Cannot admit to non-existent room: " + draft.roomId);
+    }
+    if (!room->hasAvailableBed()) {
+        throw std::invalid_argument("Room " + draft.roomId + " has no available beds.");
+    }
+
+    if (!rooms_.allocateBed(draft.roomId)) {
+        throw std::invalid_argument("Failed to allocate bed in room " + draft.roomId);
+    }
+
+    try {
+        return admissions_.admitPatient(draft);
+    } catch (...) {
+        rooms_.releaseBed(draft.roomId);
+        throw;
+    }
+}
+
+Admission HospitalSystem::dischargePatient(const Session& session,
+                                           const std::string& admissionId,
+                                           const std::string& dischargeDate,
+                                           const std::string& dischargeSummary) {
+    require(session, Permission::ManageAdmissions);
+    const auto admission = admissions_.dischargePatient(admissionId, dischargeDate, dischargeSummary);
+    rooms_.releaseBed(admission.roomId);
+    return admission;
+}
+
+std::optional<Admission> HospitalSystem::findAdmissionById(const Session& session,
+                                                           const std::string& admissionId) const {
+    require(session, Permission::ViewAdmissions);
+    return admissions_.findAdmissionById(admissionId);
+}
+
+std::vector<Admission> HospitalSystem::listActiveAdmissions(const Session& session) const {
+    require(session, Permission::ViewAdmissions);
+    return admissions_.listActiveAdmissions();
+}
+
+std::vector<Admission> HospitalSystem::listAllAdmissions(const Session& session) const {
+    require(session, Permission::ViewAdmissions);
+    return admissions_.listAllAdmissions();
+}
+
 void HospitalSystem::require(const Session& session, Permission permission) const {
     if (!auth_.isAllowed(session, permission)) {
         throw AuthorizationError("The " + toString(session.role) +

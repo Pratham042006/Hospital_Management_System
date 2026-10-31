@@ -27,6 +27,8 @@ enum class Permission {
     ViewDoctors,
     ManageAppointments,
     ViewAppointments,
+    ManageAdmissions,
+    ViewAdmissions,
 };
 
 struct InitialAccount {

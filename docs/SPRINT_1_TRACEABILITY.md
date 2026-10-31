@@ -13,8 +13,12 @@ The status and test results below reflect the reported Sprint 1 completion: all 
 | FR-05 | Doctor management | `src/doctor_repository.cpp` | `tests/test_doctors.cpp` | Completed in Sprint 1 | Passed |
 | FR-06 | Appointment scheduling | `src/appointment_repository.cpp` | `tests/test_appointment_scheduling.cpp` | Completed in Sprint 1 | Passed |
 | FR-07 | Appointment modification and cancellation | `src/appointment_repository.cpp` | `tests/test_appointment_modification.cpp` | Completed in Sprint 1 | Passed |
+| FR-08 | Admission management | `src/admission_repository.cpp` | `tests/test_admissions.cpp` | Completed in Sprint 1 | Passed |
+| FR-09 | Room and bed allocation | `src/room_repository.cpp` | `tests/test_room_allocation.cpp` | Completed in Sprint 1 | Passed |
+| FR-11 | Discharge management | `src/admission_repository.cpp` | `tests/test_admissions.cpp` | Completed in Sprint 1 | Passed |
 | NFR-01 | Performance and patient persistence | Patient persistence and performance coverage | `tests/test_performance.cpp`; `tests/test_persistence_performance.cpp` | Completed in Sprint 1 | Passed |
 | NFR-02 | Usability and safe input handling | Console workflows and usability guidance | `tests/test_usability.cpp`; `docs/USABILITY_CHECKLIST.md` | Completed in Sprint 1 | Passed |
+| NFR-03 | Reliability and fault tolerance | Non-terminating input sanitization and state consistency | `tests/test_reliability.cpp` | Completed in Sprint 1 | Passed |
 | NFR-04 | Security and role-based access | Authentication and authorization paths | `tests/test_security.cpp` | Completed in Sprint 1 | Passed |
 | NFR-05 | Maintainability and module separation | `src/patient_validation.cpp`, `src/console_app.cpp` | Clean build & test suite isolation | Completed in Sprint 1 | Passed |
 | NFR-06 | Portability and cross-platform CI | CMake configuration and `.github/workflows/ci.yml` | `tests/test_portability.cpp`; 3-OS GitHub Actions workflow (Ubuntu, macOS, Windows) | Completed in Sprint 1 | Passed |

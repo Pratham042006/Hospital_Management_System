@@ -12,6 +12,8 @@ add_library(hms_core
     src/doctor_repository.cpp
     src/patient_repository.cpp
     src/patient_validation.cpp
+    src/room_repository.cpp
+    src/admission_repository.cpp
     src/hospital_system.cpp
 )
 
@@ -84,4 +86,16 @@ add_test(NAME security_boundary_tests COMMAND security_boundary_tests)
 add_executable(appointment_conflict_tests tests/test_appointment_conflicts.cpp)
 target_link_libraries(appointment_conflict_tests PRIVATE hms_core)
 add_test(NAME appointment_conflict_tests COMMAND appointment_conflict_tests)
+
+add_executable(room_allocation_tests tests/test_room_allocation.cpp)
+target_link_libraries(room_allocation_tests PRIVATE hms_core)
+add_test(NAME room_allocation_tests COMMAND room_allocation_tests)
+
+add_executable(admission_tests tests/test_admissions.cpp)
+target_link_libraries(admission_tests PRIVATE hms_core)
+add_test(NAME admission_tests COMMAND admission_tests)
+
+add_executable(reliability_tests tests/test_reliability.cpp)
+target_link_libraries(reliability_tests PRIVATE hms_core)
+add_test(NAME reliability_tests COMMAND reliability_tests)
 

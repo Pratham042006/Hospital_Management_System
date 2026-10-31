@@ -23,6 +23,8 @@ const PermissionList& permissionsForRole(Role role) {
         Permission::ViewDoctors,
         Permission::ManageAppointments,
         Permission::ViewAppointments,
+        Permission::ManageAdmissions,
+        Permission::ViewAdmissions,
     };
     static const PermissionList receptionist{
         Permission::RegisterPatient,
@@ -32,16 +34,20 @@ const PermissionList& permissionsForRole(Role role) {
         Permission::ViewDoctors,
         Permission::ManageAppointments,
         Permission::ViewAppointments,
+        Permission::ManageAdmissions,
+        Permission::ViewAdmissions,
     };
     static const PermissionList doctor{
         Permission::SearchPatient,
         Permission::ViewClinicalData,
         Permission::ViewDoctors,
         Permission::ViewAppointments,
+        Permission::ViewAdmissions,
     };
     static const PermissionList billing{
         Permission::SearchPatient,
         Permission::ManageBilling,
+        Permission::ViewAdmissions,
     };
 
     switch (role) {
