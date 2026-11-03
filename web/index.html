@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System | Clinical Portal</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="fas fa-heartbeat"></i>
+            <div class="brand-text">
+                <h2>Hospital HMS</h2>
+                <span>Enterprise v2.0</span>
+            </div>
+        </div>
+
+        <ul class="nav-links">
+            <li class="nav-item active" id="nav-overview" onclick="switchTab('overview')">
+                <i class="fas fa-th-large"></i> Overview
+            </li>
+            <li class="nav-item" id="nav-patients" onclick="switchTab('patients')">
+                <i class="fas fa-users"></i> Patients Registry
+            </li>
+            <li class="nav-item" id="nav-doctors" onclick="switchTab('doctors')">
+                <i class="fas fa-user-md"></i> Doctors & Slots
+            </li>
+            <li class="nav-item" id="nav-appointments" onclick="switchTab('appointments')">
+                <i class="fas fa-calendar-check"></i> Appointments
+            </li>
+            <li class="nav-item" id="nav-ward" onclick="switchTab('ward')">
+                <i class="fas fa-bed"></i> Inpatient Wards
+            </li>
+            <li class="nav-item" id="nav-admissions" onclick="switchTab('admissions')">
+                <i class="fas fa-hospital-user"></i> Admissions
+            </li>
+            <li class="nav-item" id="nav-records" onclick="switchTab('records')">
+                <i class="fas fa-file-medical"></i> Medical Records
+            </li>
+            <li class="nav-item" id="nav-billing" onclick="switchTab('billing')">
+                <i class="fas fa-file-invoice-dollar"></i> Billing & Ledger
+            </li>
+            <li class="nav-item" id="nav-reports" onclick="switchTab('reports')">
+                <i class="fas fa-chart-line"></i> Intelligence Reports
+            </li>
+            <li class="nav-item" id="nav-backup" onclick="switchTab('backup')">
+                <i class="fas fa-database"></i> Backup & Restore
+            </li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <div><i class="fas fa-shield-alt"></i> HIPAA Compliant</div>
+            <div>SE Mini-Project Sprint 2</div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+        <header class="topbar">
+            <div class="topbar-title" id="page-title">Hospital Management System Dashboard</div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div class="user-badge">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Admin Session</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="content-container">
+            <!-- 1. Overview Tab -->
+            <div id="overview-view" class="tab-view active"></div>
+
+            <!-- 2. Patients Tab -->
+            <div id="patients-view" class="tab-view">
+                <div class="card header-card">
+                    <div class="card-title-row">
+                        <h3><i class="fas fa-users"></i> Patient Master Registry (FR-02, FR-03, FR-04)</h3>
+                        <button class="btn btn-primary" onclick="window.openRegisterPatientModal()">
+                            <i class="fas fa-user-plus"></i> Register New Patient
+                        </button>
+                    </div>
+                    <p class="subtitle">Complete patient directory with contact verification and emergency profiles.</p>
+                </div>
+                <div class="card table-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Patient ID</th>
+                                <th>Full Name</th>
+                                <th>DOB</th>
+                                <th>Gender</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patients-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. Doctors Tab -->
+            <div id="doctors-view" class="tab-view">
+                <div class="card header-card">
+                    <div class="card-title-row">
+                        <h3><i class="fas fa-user-md"></i> Medical Specialists Directory (FR-05)</h3>
+                        <button class="btn btn-primary" onclick="window.openAddDoctorModal()">
+                            <i class="fas fa-plus"></i> Add Specialist
+                        </button>
+                    </div>
+                </div>
+                <div class="card table-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Doctor ID</th>
+                                <th>Full Name</th>
+                                <th>Specialization</th>
+                                <th>Department</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctors-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 4. Appointments Tab -->
+            <div id="appointments-view" class="tab-view">
+                <div class="card header-card">
+                    <div class="card-title-row">
+                        <h3><i class="fas fa-calendar-alt"></i> Appointment Scheduling (FR-06, FR-07)</h3>
+                        <button class="btn btn-primary" onclick="window.openScheduleModal()">
+                            <i class="fas fa-calendar-plus"></i> Book Appointment
+                        </button>
+                    </div>
+                </div>
+                <div class="card table-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Appointment ID</th>
+                                <th>Patient ID</th>
+                                <th>Doctor ID</th>
+                                <th>Schedule</th>
+                                <th>Purpose</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointments-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. Ward Tab (InpatientModule) -->
+            <div id="ward-view" class="tab-view"></div>
+
+            <!-- 6. Admissions Tab (InpatientModule) -->
+            <div id="admissions-view" class="tab-view"></div>
+
+            <!-- 7. Medical Records Tab (RecordsBillingModule) -->
+            <div id="medical-records-view" class="tab-view"></div>
+
+            <!-- 8. Billing Tab (RecordsBillingModule) -->
+            <div id="billing-view" class="tab-view"></div>
+
+            <!-- 9. Reports Tab (ReportsBackupModule) -->
+            <div id="reports-view" class="tab-view"></div>
+
+            <!-- 10. Backup Tab (ReportsBackupModule) -->
+            <div id="backup-view" class="tab-view"></div>
+        </section>
+    </main>
+
+    <!-- Submodule scripts -->
+    <script src="js/records_billing.js"></script>
+    <script src="js/reports_backup.js"></script>
+    <script src="js/inpatient_management.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
