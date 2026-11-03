@@ -14,6 +14,8 @@ add_library(hms_core
     src/patient_validation.cpp
     src/room_repository.cpp
     src/admission_repository.cpp
+    src/medical_record_repository.cpp
+    src/bill_repository.cpp
     src/hospital_system.cpp
 )
 
@@ -98,4 +100,12 @@ add_test(NAME admission_tests COMMAND admission_tests)
 add_executable(reliability_tests tests/test_reliability.cpp)
 target_link_libraries(reliability_tests PRIVATE hms_core)
 add_test(NAME reliability_tests COMMAND reliability_tests)
+
+add_executable(medical_records_tests tests/test_medical_records.cpp)
+target_link_libraries(medical_records_tests PRIVATE hms_core)
+add_test(NAME medical_records_tests COMMAND medical_records_tests)
+
+add_executable(billing_tests tests/test_billing.cpp)
+target_link_libraries(billing_tests PRIVATE hms_core)
+add_test(NAME billing_tests COMMAND billing_tests)
 
