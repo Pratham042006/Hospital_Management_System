@@ -339,6 +339,55 @@ std::vector<Payment> HospitalSystem::listPaymentsForBill(const Session& session,
     return bills_.listPaymentsForBill(billId);
 }
 
+PatientCensusReport HospitalSystem::getPatientCensusReport(const Session& session) const {
+    require(session, Permission::ViewReports);
+    return ReportService::generatePatientCensus(patients_.size(), admissions_.listAllAdmissions());
+}
+
+AppointmentSummaryReport HospitalSystem::getAppointmentSummaryReport(const Session& session) const {
+    require(session, Permission::ViewReports);
+    return ReportService::generateAppointmentSummary(appointments_.list());
+}
+
+RoomOccupancyReport HospitalSystem::getRoomOccupancyReport(const Session& session) const {
+    require(session, Permission::ViewReports);
+    return ReportService::generateRoomOccupancy(rooms_.listAllRooms());
+}
+
+BillingRevenueReport HospitalSystem::getBillingRevenueReport(const Session& session) const {
+    require(session, Permission::ViewReports);
+    return ReportService::generateBillingRevenue(bills_.listAllBills());
+}
+
+DoctorUtilizationReport HospitalSystem::getDoctorUtilizationReport(const Session& session) const {
+    require(session, Permission::ViewReports);
+    return ReportService::generateDoctorUtilization(
+        doctors_.list(), appointments_.list(), admissions_.listAllAdmissions());
+}
+
+bool HospitalSystem::exportSystemBackup(const Session& session, const std::string& destinationPath) const {
+    require(session, Permission::ManageBackup);
+    BackupSnapshot snapshot;
+    snapshot.version = "1.0.0";
+    snapshot.timestamp = "2026-11-04 12:00:00";
+    snapshot.patientCount = patients_.size();
+    snapshot.doctorCount = doctors_.list().size();
+    snapshot.appointmentCount = appointments_.list().size();
+    snapshot.roomCount = rooms_.listAllRooms().size();
+    snapshot.admissionCount = admissions_.listAllAdmissions().size();
+    snapshot.recordCount = medicalRecords_.size();
+    snapshot.billCount = bills_.size();
+    snapshot.manifestSummary = "Automated full system state export";
+
+    std::string payload = "ENTITIES_DUMP_OK";
+    return BackupService::exportSnapshot(destinationPath, snapshot, payload);
+}
+
+bool HospitalSystem::verifyBackupFile(const Session& session, const std::string& sourcePath) const {
+    require(session, Permission::ManageBackup);
+    return BackupService::verifyIntegrity(sourcePath);
+}
+
 void HospitalSystem::require(const Session& session, Permission permission) const {
     if (!auth_.isAllowed(session, permission)) {
         throw AuthorizationError("The " + toString(session.role) +

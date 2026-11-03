@@ -4,9 +4,11 @@
 #include "hms/auth.hpp"
 #include "hms/appointment_repository.hpp"
 #include "hms/bill_repository.hpp"
+#include "hms/backup_service.hpp"
 #include "hms/doctor_repository.hpp"
 #include "hms/medical_record_repository.hpp"
 #include "hms/patient_repository.hpp"
+#include "hms/report_service.hpp"
 #include "hms/room_repository.hpp"
 
 #include <optional>
@@ -115,6 +117,17 @@ public:
     std::vector<Bill> listAllBills(const Session& session) const;
     Payment recordPayment(const Session& session, const PaymentDraft& draft);
     std::vector<Payment> listPaymentsForBill(const Session& session, const std::string& billId) const;
+
+    // FR-14: Reports Engine
+    PatientCensusReport getPatientCensusReport(const Session& session) const;
+    AppointmentSummaryReport getAppointmentSummaryReport(const Session& session) const;
+    RoomOccupancyReport getRoomOccupancyReport(const Session& session) const;
+    BillingRevenueReport getBillingRevenueReport(const Session& session) const;
+    DoctorUtilizationReport getDoctorUtilizationReport(const Session& session) const;
+
+    // FR-17: Data Backup
+    bool exportSystemBackup(const Session& session, const std::string& destinationPath) const;
+    bool verifyBackupFile(const Session& session, const std::string& sourcePath) const;
 
 private:
     AuthService auth_;
