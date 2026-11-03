@@ -1,4 +1,5 @@
 #include "hms/hospital_system.hpp"
+#include "hms/safety_manager.hpp"
 
 namespace hms {
 
@@ -386,6 +387,34 @@ bool HospitalSystem::exportSystemBackup(const Session& session, const std::strin
 bool HospitalSystem::verifyBackupFile(const Session& session, const std::string& sourcePath) const {
     require(session, Permission::ManageBackup);
     return BackupService::verifyIntegrity(sourcePath);
+}
+
+bool HospitalSystem::safeShutdown(const Session& session) {
+    require(session, Permission::ManageUsers);
+    std::vector<std::pair<std::string, std::string>> dumps;
+    dumps.emplace_back("patients_shutdown.dat", "PATIENTS_COUNT=" + std::to_string(patients_.size()));
+    dumps.emplace_back("admissions_shutdown.dat", "ADMISSIONS_COUNT=" + std::to_string(admissions_.listAllAdmissions().size()));
+    dumps.emplace_back("rooms_shutdown.dat", "ROOMS_COUNT=" + std::to_string(rooms_.listAllRooms().size()));
+    return SafetyManager::safeFlush(dumps);
+}
+
+bool HospitalSystem::checkDataConsistency(const Session& session) const {
+    require(session, Permission::ViewAdmissions);
+    std::vector<std::string> patientIds;
+    std::vector<std::string> roomIds;
+    for (const auto& r : rooms_.listAllRooms()) {
+        roomIds.push_back(r.id);
+    }
+    std::vector<std::string> doctorIds;
+    for (const auto& d : doctors_.list()) {
+        doctorIds.push_back(d.id);
+    }
+    std::vector<std::pair<std::string, std::string>> admPairs;
+    for (const auto& adm : admissions_.listAllAdmissions()) {
+        admPairs.emplace_back(adm.patientId, adm.roomId);
+        patientIds.push_back(adm.patientId);
+    }
+    return SafetyManager::verifyConsistency(patientIds, doctorIds, roomIds, admPairs);
 }
 
 void HospitalSystem::require(const Session& session, Permission permission) const {
