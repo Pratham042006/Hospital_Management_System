@@ -18,6 +18,7 @@ add_library(hms_core
     src/bill_repository.cpp
     src/report_service.cpp
     src/backup_service.cpp
+    src/safety_manager.cpp
     src/hospital_system.cpp
 )
 
@@ -118,4 +119,12 @@ add_test(NAME report_tests COMMAND report_tests)
 add_executable(backup_tests tests/test_backup.cpp)
 target_link_libraries(backup_tests PRIVATE hms_core)
 add_test(NAME backup_tests COMMAND backup_tests)
+
+add_executable(safe_save_tests tests/test_safe_save.cpp)
+target_link_libraries(safe_save_tests PRIVATE hms_core)
+add_test(NAME safe_save_tests COMMAND safe_save_tests)
+
+add_executable(inpatient_workflow_tests tests/test_inpatient_workflow.cpp)
+target_link_libraries(inpatient_workflow_tests PRIVATE hms_core)
+add_test(NAME inpatient_workflow_tests COMMAND inpatient_workflow_tests)
 

@@ -129,6 +129,10 @@ public:
     bool exportSystemBackup(const Session& session, const std::string& destinationPath) const;
     bool verifyBackupFile(const Session& session, const std::string& sourcePath) const;
 
+    // FR-18 & NFR-03: Safe Save, System Exit & Reliability Consistency
+    bool safeShutdown(const Session& session);
+    bool checkDataConsistency(const Session& session) const;
+
 private:
     AuthService auth_;
     PatientRepository patients_;
