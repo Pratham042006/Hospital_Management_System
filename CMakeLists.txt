@@ -19,10 +19,16 @@ add_library(hms_core
     src/report_service.cpp
     src/backup_service.cpp
     src/safety_manager.cpp
+    src/validation_service.cpp
+    src/persistence_engine.cpp
+    src/http_server.cpp
     src/hospital_system.cpp
 )
 
 target_include_directories(hms_core PUBLIC include)
+if(WIN32)
+    target_link_libraries(hms_core PRIVATE ws2_32)
+endif()
 if(MSVC)
     target_compile_options(hms_core PRIVATE /W4 /permissive-)
 else()
@@ -127,4 +133,16 @@ add_test(NAME safe_save_tests COMMAND safe_save_tests)
 add_executable(inpatient_workflow_tests tests/test_inpatient_workflow.cpp)
 target_link_libraries(inpatient_workflow_tests PRIVATE hms_core)
 add_test(NAME inpatient_workflow_tests COMMAND inpatient_workflow_tests)
+
+add_executable(validation_tests tests/test_validation.cpp)
+target_link_libraries(validation_tests PRIVATE hms_core)
+add_test(NAME validation_tests COMMAND validation_tests)
+
+add_executable(persistence_engine_tests tests/test_persistence_engine.cpp)
+target_link_libraries(persistence_engine_tests PRIVATE hms_core)
+add_test(NAME persistence_engine_tests COMMAND persistence_engine_tests)
+
+add_executable(http_server_tests tests/test_http_server.cpp)
+target_link_libraries(http_server_tests PRIVATE hms_core)
+add_test(NAME http_server_tests COMMAND http_server_tests)
 
