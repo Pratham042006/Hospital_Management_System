@@ -3,7 +3,9 @@
 #include "hms/admission_repository.hpp"
 #include "hms/auth.hpp"
 #include "hms/appointment_repository.hpp"
+#include "hms/bill_repository.hpp"
 #include "hms/doctor_repository.hpp"
+#include "hms/medical_record_repository.hpp"
 #include "hms/patient_repository.hpp"
 #include "hms/room_repository.hpp"
 
@@ -98,6 +100,22 @@ public:
     std::vector<Admission> listActiveAdmissions(const Session& session) const;
     std::vector<Admission> listAllAdmissions(const Session& session) const;
 
+    // FR-10: Medical Record Management
+    MedicalRecord createMedicalRecord(const Session& session, const MedicalRecordDraft& draft);
+    std::optional<MedicalRecord> findMedicalRecordById(const Session& session,
+                                                       const std::string& recordId) const;
+    std::vector<MedicalRecord> getMedicalRecordsByPatient(const Session& session,
+                                                          const std::string& patientId) const;
+    std::vector<MedicalRecord> listAllMedicalRecords(const Session& session) const;
+
+    // FR-12 & FR-13: Billing and Payment Recording
+    Bill createBill(const Session& session, const BillDraft& draft);
+    std::optional<Bill> findBillById(const Session& session, const std::string& billId) const;
+    std::vector<Bill> getBillsByPatient(const Session& session, const std::string& patientId) const;
+    std::vector<Bill> listAllBills(const Session& session) const;
+    Payment recordPayment(const Session& session, const PaymentDraft& draft);
+    std::vector<Payment> listPaymentsForBill(const Session& session, const std::string& billId) const;
+
 private:
     AuthService auth_;
     PatientRepository patients_;
@@ -105,6 +123,8 @@ private:
     AppointmentRepository appointments_;
     RoomRepository rooms_;
     AdmissionRepository admissions_;
+    MedicalRecordRepository medicalRecords_;
+    BillRepository bills_;
 
     void require(const Session& session, Permission permission) const;
 };

@@ -273,6 +273,72 @@ std::vector<Admission> HospitalSystem::listAllAdmissions(const Session& session)
     return admissions_.listAllAdmissions();
 }
 
+MedicalRecord HospitalSystem::createMedicalRecord(const Session& session, const MedicalRecordDraft& draft) {
+    require(session, Permission::ManageMedicalRecords);
+    if (!patients_.findById(draft.patientId)) {
+        throw std::invalid_argument("Patient ID does not exist: " + draft.patientId);
+    }
+    if (!doctors_.findById(draft.doctorId)) {
+        throw std::invalid_argument("Doctor ID does not exist: " + draft.doctorId);
+    }
+    return medicalRecords_.addRecord(draft);
+}
+
+std::optional<MedicalRecord> HospitalSystem::findMedicalRecordById(
+    const Session& session,
+    const std::string& recordId) const {
+    require(session, Permission::ViewClinicalData);
+    return medicalRecords_.findById(recordId);
+}
+
+std::vector<MedicalRecord> HospitalSystem::getMedicalRecordsByPatient(
+    const Session& session,
+    const std::string& patientId) const {
+    require(session, Permission::ViewClinicalData);
+    return medicalRecords_.findByPatientId(patientId);
+}
+
+std::vector<MedicalRecord> HospitalSystem::listAllMedicalRecords(const Session& session) const {
+    require(session, Permission::ViewClinicalData);
+    return medicalRecords_.listAll();
+}
+
+Bill HospitalSystem::createBill(const Session& session, const BillDraft& draft) {
+    require(session, Permission::ManageBilling);
+    if (!patients_.findById(draft.patientId)) {
+        throw std::invalid_argument("Cannot create bill for non-existent patient: " + draft.patientId);
+    }
+    if (draft.admissionId && !admissions_.findAdmissionById(*draft.admissionId)) {
+        throw std::invalid_argument("Cannot link bill to non-existent admission: " + *draft.admissionId);
+    }
+    return bills_.createBill(draft);
+}
+
+std::optional<Bill> HospitalSystem::findBillById(const Session& session, const std::string& billId) const {
+    require(session, Permission::ManageBilling);
+    return bills_.findBillById(billId);
+}
+
+std::vector<Bill> HospitalSystem::getBillsByPatient(const Session& session, const std::string& patientId) const {
+    require(session, Permission::ManageBilling);
+    return bills_.findByPatientId(patientId);
+}
+
+std::vector<Bill> HospitalSystem::listAllBills(const Session& session) const {
+    require(session, Permission::ManageBilling);
+    return bills_.listAllBills();
+}
+
+Payment HospitalSystem::recordPayment(const Session& session, const PaymentDraft& draft) {
+    require(session, Permission::ManageBilling);
+    return bills_.recordPayment(draft);
+}
+
+std::vector<Payment> HospitalSystem::listPaymentsForBill(const Session& session, const std::string& billId) const {
+    require(session, Permission::ManageBilling);
+    return bills_.listPaymentsForBill(billId);
+}
+
 void HospitalSystem::require(const Session& session, Permission permission) const {
     if (!auth_.isAllowed(session, permission)) {
         throw AuthorizationError("The " + toString(session.role) +
