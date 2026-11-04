@@ -39,7 +39,9 @@ class HospitalSystem {
 public:
     explicit HospitalSystem(
         const std::vector<InitialAccount>& initialAccounts,
-        const std::optional<std::string>& patientJournalPath = std::nullopt);
+        const std::optional<std::string>& patientJournalPath = std::nullopt,
+        const std::optional<std::string>& medicalRecordJournalPath = std::nullopt,
+        const std::optional<std::string>& billingJournalPath = std::nullopt);
 
     std::optional<Session> login(const std::string& username,
                                  const std::string& password) const;

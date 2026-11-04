@@ -10,6 +10,9 @@ namespace hms {
 
 class BillRepository {
 public:
+    explicit BillRepository(
+        const std::optional<std::string>& journalPath = std::nullopt);
+
     Bill createBill(const BillDraft& draft);
     std::optional<Bill> findBillById(const std::string& billId) const;
     std::vector<Bill> findByPatientId(const std::string& patientId) const;
@@ -29,9 +32,13 @@ private:
     std::vector<Payment> payments_;
     std::size_t nextBillId_{1};
     std::size_t nextPaymentId_{1};
+    std::optional<std::string> journalPath_;
 
     std::string generateBillId();
     std::string generatePaymentId();
+    void appendBillToJournal(const BillDraft& draft, const Bill& bill) const;
+    void appendPaymentToJournal(const PaymentDraft& draft, const Payment& payment) const;
+    void loadJournal();
 };
 
 }  // namespace hms

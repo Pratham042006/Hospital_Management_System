@@ -9,14 +9,27 @@ window.RecordsBillingModule = (function () {
     let bills = [];
     let payments = [];
 
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, character => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        })[character]);
+    }
+
+    function validDate(value) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+        const date = new Date(`${value}T00:00:00Z`);
+        return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+    }
+
     function init() {
         renderRecordsTab();
         renderBillingTab();
     }
 
     function createMedicalRecord(record) {
-        if (!record.patientId || !record.doctorId || !record.diagnosis) {
-            throw new Error("Patient ID, Doctor ID, and Diagnosis are required.");
+        if (!record.patientId || !record.doctorId || !record.diagnosis ||
+            !validDate(record.visitDate || new Date().toISOString().slice(0, 10))) {
+            throw new Error("Patient ID, Doctor ID, Diagnosis, and a valid visit date are required.");
         }
         const newRecord = {
             id: 'MR-' + String(medicalRecords.length + 1).padStart(5, '0'),
@@ -30,6 +43,7 @@ window.RecordsBillingModule = (function () {
             createdAt: new Date().toISOString().slice(0, 10)
         };
         medicalRecords.push(newRecord);
+        renderRecordsTab();
         return newRecord;
     }
 
@@ -37,17 +51,27 @@ window.RecordsBillingModule = (function () {
         if (!billData.patientId || !billData.items || billData.items.length === 0) {
             throw new Error("Patient ID and at least one bill item are required.");
         }
+        const issueDate = billData.issueDate || new Date().toISOString().slice(0, 10);
+        const dueDate = billData.dueDate || new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+        if (!validDate(issueDate) || !validDate(dueDate)) throw new Error("Bill dates must use YYYY-MM-DD.");
+        if (billData.dueDate && (!validDate(billData.dueDate) ||
+            dueDate < issueDate)) {
+            throw new Error("Due date must be valid and cannot precede the issue date.");
+        }
         const total = billData.items.reduce((sum, item) => {
-            if (item.amount <= 0) throw new Error("Item amount must be positive.");
-            return sum + Number(item.amount);
+            if (!String(item.description || '').trim()) throw new Error("Item description is required.");
+            const amount = Number(item.amount);
+            if (!Number.isFinite(amount) || amount <= 0) throw new Error("Item amount must be a positive number.");
+            return sum + amount;
         }, 0);
+        if (!Number.isFinite(total)) throw new Error("Bill total is too large.");
 
         const newBill = {
             id: 'B-' + String(bills.length + 1).padStart(5, '0'),
             patientId: billData.patientId,
             admissionId: billData.admissionId || null,
-            issueDate: billData.issueDate || new Date().toISOString().slice(0, 10),
-            dueDate: billData.dueDate || new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+            issueDate,
+            dueDate,
             items: billData.items,
             totalAmount: Math.round(total * 100) / 100,
             paidAmount: 0.0,
@@ -55,6 +79,7 @@ window.RecordsBillingModule = (function () {
             status: 'Unpaid'
         };
         bills.push(newBill);
+        renderBillingTab();
         return newBill;
     }
 
@@ -62,7 +87,13 @@ window.RecordsBillingModule = (function () {
         const bill = bills.find(b => b.id === paymentData.billId);
         if (!bill) throw new Error("Bill ID not found: " + paymentData.billId);
         const amount = Number(paymentData.amount);
-        if (amount <= 0) throw new Error("Payment amount must be greater than zero.");
+        if (!Number.isFinite(amount) || amount <= 0) throw new Error("Payment amount must be a positive number.");
+        if (!validDate(paymentData.paymentDate || new Date().toISOString().slice(0, 10))) {
+            throw new Error("Payment date must be YYYY-MM-DD.");
+        }
+        if (!['Cash', 'Credit Card', 'Debit Card', 'Insurance', 'Bank Transfer'].includes(paymentData.method || 'Cash')) {
+            throw new Error("Select a supported payment method.");
+        }
         if (amount > (bill.balance + 0.01)) throw new Error("Payment exceeds outstanding balance.");
 
         const payment = {
@@ -85,7 +116,54 @@ window.RecordsBillingModule = (function () {
         }
 
         payments.push(payment);
+        renderBillingTab();
         return payment;
+    }
+
+    function openAddRecordModal() {
+        const patientId = prompt('Patient ID:');
+        if (patientId === null) return;
+        const doctorId = prompt('Doctor ID:');
+        if (doctorId === null) return;
+        const visitDate = prompt('Visit date (YYYY-MM-DD):', new Date().toISOString().slice(0, 10));
+        if (visitDate === null) return;
+        const diagnosis = prompt('Diagnosis:');
+        if (diagnosis === null) return;
+        try {
+            createMedicalRecord({ patientId, doctorId, visitDate, diagnosis,
+                symptoms: prompt('Symptoms (optional):') || '',
+                treatmentNotes: prompt('Treatment notes (optional):') || '',
+                prescriptions: (prompt('Prescriptions, separated by commas (optional):') || '')
+                    .split(',').map(item => item.trim()).filter(Boolean) });
+            renderRecordsTab();
+        } catch (error) { alert(error.message); }
+    }
+
+    function viewRecordDetails(recordId) {
+        const record = medicalRecords.find(item => item.id === recordId);
+        if (!record) return;
+        alert(`Diagnosis: ${record.diagnosis}\nSymptoms: ${record.symptoms || '—'}\n` +
+            `Treatment: ${record.treatmentNotes || '—'}\nPrescriptions: ${record.prescriptions.join(', ') || '—'}`);
+    }
+
+    function openCreateBillModal() {
+        const patientId = prompt('Patient ID:');
+        if (patientId === null) return;
+        const description = prompt('Bill item description:');
+        if (description === null) return;
+        const amount = Number(prompt('Amount:'));
+        try {
+            createBill({ patientId, items: [{ category: 'Other', description, amount }] });
+        } catch (error) { alert(error.message); }
+    }
+
+    function openPaymentModal(billId) {
+        const amount = Number(prompt('Payment amount:'));
+        if (!Number.isFinite(amount) || amount <= 0) return;
+        const method = prompt('Payment method (Cash, Credit Card, Debit Card, Insurance, Bank Transfer):', 'Cash');
+        if (method === null) return;
+        try { recordPayment({ billId, amount, method }); }
+        catch (error) { alert(error.message); }
     }
 
     function renderRecordsTab() {
@@ -117,14 +195,14 @@ window.RecordsBillingModule = (function () {
                     <tbody id="records-table-body">
                         ${medicalRecords.map(r => `
                             <tr>
-                                <td><strong>${r.id}</strong></td>
-                                <td>${r.patientId}</td>
-                                <td>${r.doctorId}</td>
-                                <td>${r.visitDate}</td>
-                                <td><span class="badge badge-diagnosis">${r.diagnosis}</span></td>
-                                <td>${r.prescriptions.join(', ')}</td>
+                                <td><strong>${escapeHtml(r.id)}</strong></td>
+                                <td>${escapeHtml(r.patientId)}</td>
+                                <td>${escapeHtml(r.doctorId)}</td>
+                                <td>${escapeHtml(r.visitDate)}</td>
+                                <td><span class="badge badge-diagnosis">${escapeHtml(r.diagnosis)}</span></td>
+                                <td>${escapeHtml(r.prescriptions.join(', '))}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline" onclick="window.RecordsBillingModule.viewRecordDetails('${r.id}')">View Notes</button>
+                                    <button class="btn btn-sm btn-outline" onclick='window.RecordsBillingModule.viewRecordDetails(${JSON.stringify(r.id)})'>View Notes</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -181,16 +259,16 @@ window.RecordsBillingModule = (function () {
                     <tbody id="bills-table-body">
                         ${bills.map(b => `
                             <tr>
-                                <td><strong>${b.id}</strong></td>
-                                <td>${b.patientId}</td>
-                                <td>${b.issueDate}</td>
+                                <td><strong>${escapeHtml(b.id)}</strong></td>
+                                <td>${escapeHtml(b.patientId)}</td>
+                                <td>${escapeHtml(b.issueDate)}</td>
                                 <td>$${b.totalAmount.toFixed(2)}</td>
                                 <td>$${b.paidAmount.toFixed(2)}</td>
                                 <td>$${b.balance.toFixed(2)}</td>
                                 <td><span class="badge badge-${b.status.toLowerCase().replace(' ', '-')}">${b.status}</span></td>
                                 <td>
                                     ${b.status !== 'Paid' ? `
-                                        <button class="btn btn-sm btn-success" onclick="window.RecordsBillingModule.openPaymentModal('${b.id}')">
+                                        <button class="btn btn-sm btn-success" onclick='window.RecordsBillingModule.openPaymentModal(${JSON.stringify(b.id)})'>
                                             Pay
                                         </button>
                                     ` : '<span class="text-muted">Settled</span>'}
@@ -208,6 +286,10 @@ window.RecordsBillingModule = (function () {
         createMedicalRecord,
         createBill,
         recordPayment,
+        openAddRecordModal,
+        viewRecordDetails,
+        openCreateBillModal,
+        openPaymentModal,
         renderRecordsTab,
         renderBillingTab,
         getMedicalRecords: () => medicalRecords,
