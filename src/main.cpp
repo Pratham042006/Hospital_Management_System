@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
                 {"receptionist", "test-reception-password", hms::Role::Receptionist},
                 {"doctor", "test-doctor-password", hms::Role::Doctor},
                 {"billing", "test-billing-password", hms::Role::BillingStaff},
-            });
+            }, "data/patients.journal", "data/medical_records.journal", "data/billing.journal");
             hms::HttpServer server(system, port);
             server.start();
             std::string line;

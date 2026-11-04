@@ -277,7 +277,8 @@ int hms::runConsoleApp() {
         return 1;
     }
     hms::HospitalSystem system({{"admin", configuredPassword, hms::Role::Administrator}},
-                               "data/patients.journal");
+                               "data/patients.journal", "data/medical_records.journal",
+                               "data/billing.journal");
     std::cout << "Hospital Management System\n";
     const std::string username = prompt("Username: ");
     const std::string password = promptPassword("Password: ");

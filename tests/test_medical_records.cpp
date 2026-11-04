@@ -1,7 +1,10 @@
 #include "hms/hospital_system.hpp"
+#include "hms/medical_record_repository.hpp"
 #include "test_support.hpp"
 
 #include <cassert>
+#include <chrono>
+#include <filesystem>
 #include <iostream>
 
 void testMedicalRecordCreationAndRetrieval() {
@@ -103,9 +106,34 @@ void testMedicalRecordValidation() {
     std::cout << "testMedicalRecordValidation passed\n";
 }
 
+void testMedicalRecordJournalPersistence() {
+    const auto folder = std::filesystem::temp_directory_path() /
+        ("hms-medical-record-test-" + std::to_string(
+            std::chrono::steady_clock::now().time_since_epoch().count()));
+    const auto journal = folder / "records.journal";
+    hms::MedicalRecordDraft draft{"P-00042", "D-00008", "2024-02-29", "cough\tfever",
+                                  "Bronchitis", "Rest and fluids", {"Medicine A", "Medicine B"}};
+    std::string recordId;
+    {
+        hms::MedicalRecordRepository repository(journal.string());
+        recordId = repository.addRecord(draft).id;
+        assert(recordId == "MR-00001");
+    }
+    {
+        hms::MedicalRecordRepository repository(journal.string());
+        const auto restored = repository.findById(recordId);
+        assert(restored.has_value());
+        assert(restored->symptoms == draft.symptoms);
+        assert(restored->prescriptions == draft.prescriptions);
+        assert(repository.addRecord(draft).id == "MR-00002");
+    }
+    std::filesystem::remove_all(folder);
+}
+
 int main() {
     testMedicalRecordCreationAndRetrieval();
     testMedicalRecordValidation();
+    testMedicalRecordJournalPersistence();
     std::cout << "All medical record tests passed successfully.\n";
     return 0;
 }

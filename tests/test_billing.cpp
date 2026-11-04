@@ -1,9 +1,12 @@
 #include "hms/hospital_system.hpp"
+#include "hms/bill_repository.hpp"
 #include "test_support.hpp"
 
 #include <cassert>
 #include <cmath>
 #include <iostream>
+#include <chrono>
+#include <filesystem>
 
 void testBillingCreationAndCalculation() {
     auto system = makeTestSystem();
@@ -130,9 +133,39 @@ void testPaymentRecordingAndSettlement() {
     std::cout << "testPaymentRecordingAndSettlement passed\n";
 }
 
+void testBillingJournalPersistence() {
+    const auto folder = std::filesystem::temp_directory_path() /
+        ("hms-billing-test-" + std::to_string(
+            std::chrono::steady_clock::now().time_since_epoch().count()));
+    const auto journal = folder / "billing.journal";
+    hms::BillDraft draft{"P-00042", std::nullopt, "2026-11-04", "2026-11-18",
+                         {{hms::BillItemCategory::LabTest, "Blood panel", 125.50}}};
+    std::string billId;
+    {
+        hms::BillRepository repository(journal.string());
+        billId = repository.createBill(draft).id;
+        hms::PaymentDraft payment{billId, 25.50, "2026-11-05",
+                                  hms::PaymentMethod::Cash, "copay\tnote"};
+        assert(repository.recordPayment(payment).paymentId == "PAY-00001");
+    }
+    {
+        hms::BillRepository repository(journal.string());
+        const auto restored = repository.findBillById(billId);
+        assert(restored.has_value());
+        assert(restored->totalAmount == 125.50);
+        assert(restored->paidAmount == 25.50);
+        assert(restored->balance == 100.00);
+        assert(restored->status == hms::BillStatus::PartiallyPaid);
+        assert(repository.listPaymentsForBill(billId).front().notes == "copay\tnote");
+        assert(repository.totalOutstanding() == 100.00);
+    }
+    std::filesystem::remove_all(folder);
+}
+
 int main() {
     testBillingCreationAndCalculation();
     testPaymentRecordingAndSettlement();
+    testBillingJournalPersistence();
     std::cout << "All billing tests passed successfully.\n";
     return 0;
 }

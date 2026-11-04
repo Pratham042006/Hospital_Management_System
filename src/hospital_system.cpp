@@ -42,8 +42,13 @@ PatientSearchResult projectPatient(const Patient& patient, Role role) {
 
 HospitalSystem::HospitalSystem(
     const std::vector<InitialAccount>& initialAccounts,
-    const std::optional<std::string>& patientJournalPath)
-    : auth_(initialAccounts), patients_(patientJournalPath) {}
+    const std::optional<std::string>& patientJournalPath,
+    const std::optional<std::string>& medicalRecordJournalPath,
+    const std::optional<std::string>& billingJournalPath)
+    : auth_(initialAccounts),
+      patients_(patientJournalPath),
+      medicalRecords_(medicalRecordJournalPath),
+      bills_(billingJournalPath) {}
 
 std::optional<Session> HospitalSystem::login(const std::string& username,
                                              const std::string& password) const {
