@@ -102,7 +102,7 @@ window.InpatientModule = (function () {
                             <div class="room-ward">${r.wardName}</div>
                             <div class="room-type">${r.type}</div>
                             <div class="room-meta">
-                                <div><strong>Rate:</strong> $${r.dailyRate.toFixed(2)}/day</div>
+                                <div><strong>Rate:</strong> ₹${r.dailyRate.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}/day</div>
                                 <div><strong>Occupancy:</strong> ${r.occupiedBeds} / ${r.totalBeds}</div>
                             </div>
                         </div>

@@ -22,16 +22,16 @@ window.hmsState = {
 // Seed realistic healthcare dataset
 function seedInitialData() {
     window.hmsState.patients = [
-        { id: 'P-00001', fullName: 'Emily Rose', dateOfBirth: '1992-04-12', gender: 'Female', phone: '9876543210', email: 'emily.rose@example.com', address: '742 Evergreen Terrace', emergencyContactName: 'John Rose', emergencyContactPhone: '9876543219' },
-        { id: 'P-00002', fullName: 'Robert Paulson', dateOfBirth: '1980-01-15', gender: 'Male', phone: '9876543212', email: 'robert@example.com', address: '123 Main St, Springfield', emergencyContactName: 'Marla Singer', emergencyContactPhone: '9876543299' },
-        { id: 'P-00003', fullName: 'Sarah Connor', dateOfBirth: '1984-05-12', gender: 'Female', phone: '9876543214', email: 'sarah@cyberdyne.com', address: 'Los Angeles, CA', emergencyContactName: 'John Connor', emergencyContactPhone: '9876543215' },
-        { id: 'P-00004', fullName: 'Bruce Wayne', dateOfBirth: '1975-02-19', gender: 'Male', phone: '9876543220', email: 'bruce@wayneenterprises.com', address: '1007 Mountain Drive, Gotham', emergencyContactName: 'Alfred Pennyworth', emergencyContactPhone: '9876543221' }
+        { id: 'P-00001', fullName: 'Ananya Sharma', dateOfBirth: '1992-04-12', gender: 'Female', phone: '9876543210', email: 'ananya.sharma@example.com', address: 'Indiranagar, Bengaluru', emergencyContactName: 'Rohan Sharma', emergencyContactPhone: '9876543219' },
+        { id: 'P-00002', fullName: 'Arjun Mehta', dateOfBirth: '1980-01-15', gender: 'Male', phone: '9876543212', email: 'arjun.mehta@example.com', address: 'Koramangala, Bengaluru', emergencyContactName: 'Priya Mehta', emergencyContactPhone: '9876543299' },
+        { id: 'P-00003', fullName: 'Kavya Rao', dateOfBirth: '1984-05-12', gender: 'Female', phone: '9876543214', email: 'kavya.rao@example.com', address: 'Jayanagar, Bengaluru', emergencyContactName: 'Vikram Rao', emergencyContactPhone: '9876543215' },
+        { id: 'P-00004', fullName: 'Rahul Nair', dateOfBirth: '1975-02-19', gender: 'Male', phone: '9876543220', email: 'rahul.nair@example.com', address: 'Malleshwaram, Bengaluru', emergencyContactName: 'Lakshmi Nair', emergencyContactPhone: '9876543221' }
     ];
 
     window.hmsState.doctors = [
-        { id: 'D-00001', fullName: 'Dr. Gregory House', specialization: 'Diagnostics', department: 'Internal Medicine', phone: '9876543211', email: 'ghouse@hospital.com' },
-        { id: 'D-00002', fullName: 'Dr. Leonard McCoy', specialization: 'General Surgery', department: 'Surgery', phone: '9876543218', email: 'mccoy@starfleet.org' },
-        { id: 'D-00003', fullName: 'Dr. Beverly Crusher', specialization: 'Critical Care', department: 'ICU & Emergency', phone: '9876543240', email: 'crusher@enterprise.org' }
+        { id: 'D-00001', fullName: 'Dr. Anil Kumar', specialization: 'Diagnostics', department: 'Internal Medicine', phone: '9876543211', email: 'anil.kumar@example.com' },
+        { id: 'D-00002', fullName: 'Dr. Priya Menon', specialization: 'General Surgery', department: 'Surgery', phone: '9876543218', email: 'priya.menon@example.com' },
+        { id: 'D-00003', fullName: 'Dr. Neha Desai', specialization: 'Critical Care', department: 'ICU & Emergency', phone: '9876543240', email: 'neha.desai@example.com' }
     ];
 
     window.hmsState.appointments = [
@@ -145,49 +145,11 @@ function renderOverview() {
             </div>
             <div class="stat-card stat-success">
                 <div class="stat-label">Revenue Collected</div>
-                <div class="stat-value">$${totalRevenue.toFixed(2)}</div>
+                <div class="stat-value">₹${totalRevenue.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                 <div class="stat-footnote">Settled Transactions</div>
             </div>
         </div>
 
-        <div class="grid-two-col">
-            <div class="card">
-                <h4><i class="fas fa-users-cog"></i> Sprint 2 Team Contributors</h4>
-                <p style="margin-bottom: 12px; color: var(--text-muted); font-size: 0.9rem;">
-                    Modules delivered by teammates with 100% CI compliance:
-                </p>
-                <ul class="doctor-workload-list">
-                    <li>
-                        <span><strong>Pratik Patil</strong> (@Pratix005)</span>
-                        <span class="badge badge-primary">FR-10 Records, FR-12 Billing, FR-13 Payments</span>
-                    </li>
-                    <li>
-                        <span><strong>Pratham P Shetty</strong> (@ka27n1001-svg)</span>
-                        <span class="badge badge-accent">FR-14 Reports Engine, FR-17 Backup</span>
-                    </li>
-                    <li>
-                        <span><strong>Prathik M Nambiar</strong> (@prathiknambiar)</span>
-                        <span class="badge badge-warning">FR-08/09/11 Inpatient, FR-18 Safe Save, NFR-03</span>
-                    </li>
-                    <li>
-                        <span><strong>Pratham Mudakavi</strong> (@Pratham042006)</span>
-                        <span class="badge badge-success">FR-15 Validation, FR-16 Persistence, Web Server</span>
-                    </li>
-                </ul>
-            </div>
-            <div class="card">
-                <h4><i class="fas fa-tasks"></i> System Architecture Status</h4>
-                <p style="margin-bottom: 14px; font-size: 0.9rem; color: var(--text-muted);">
-                    Pure C++17 Multi-Platform Core, Embedded HTTP Socket Server, Zero external dependencies.
-                </p>
-                <div style="font-size: 0.85rem; line-height: 1.8;">
-                    <div>✓ <strong>Tests Passed:</strong> 23/23 Automated Unit & Integration Suites</div>
-                    <div>✓ <strong>Cross-Platform CI:</strong> Ubuntu Latest, macOS Latest, Windows Latest</div>
-                    <div>✓ <strong>Persistence:</strong> Journal Synchronization & Atomic Save Engine</div>
-                    <div>✓ <strong>REST API:</strong> Live JSON endpoints on port 8080</div>
-                </div>
-            </div>
-        </div>
     `;
 }
 
@@ -239,27 +201,38 @@ function renderAppointments() {
 
 // Global modal triggers for forms
 window.openRegisterPatientModal = function () {
-    const name = prompt("Enter Patient Full Name:");
-    if (!name) return;
-    const dob = prompt("Enter Date of Birth (YYYY-MM-DD):", "1990-05-15");
-    const gender = prompt("Enter Gender (Male/Female/Other):", "Female");
-    const phone = prompt("Enter Phone Number (10 digits):", "9876543299");
-    const address = prompt("Enter Residential Address:", "123 Healthcare Ave");
-
-    const newId = 'P-' + String(window.hmsState.patients.length + 1).padStart(5, '0');
-    window.hmsState.patients.push({
-        id: newId,
-        fullName: name,
-        dateOfBirth: dob || '1990-01-01',
-        gender: gender || 'Female',
-        phone: phone || '9876543200',
-        email: name.toLowerCase().replace(' ', '.') + '@example.com',
-        address: address || 'City Hospital Quarters',
-        emergencyContactName: 'Relative',
-        emergencyContactPhone: '9876543201'
+    const dialog = document.createElement('dialog');
+    dialog.className = 'patient-dialog';
+    dialog.innerHTML = `<form class="patient-form">
+        <div class="form-heading"><div><h2>Register a patient</h2><p>Enter the patient's details below.</p></div><button type="button" class="close-dialog" aria-label="Close">&times;</button></div>
+        <div class="form-grid">
+          <label>Full name <input name="fullName" required autocomplete="name"></label>
+          <label>Date of birth <input name="dateOfBirth" type="date" required></label>
+          <label>Gender <select name="gender" required><option value="">Select gender</option><option>Female</option><option>Male</option><option>Other</option></select></label>
+          <label>Phone number <input name="phone" type="tel" pattern="[0-9]{10}" title="Enter 10 digits" required></label>
+          <label>Email <input name="email" type="email"></label>
+          <label>Address <input name="address"></label>
+          <label>Emergency contact name <input name="emergencyContactName"></label>
+          <label>Emergency contact phone <input name="emergencyContactPhone" type="tel" pattern="[0-9]{10}" title="Enter 10 digits"></label>
+        </div><p class="form-note">Demo data is kept only for this browser session. Use fictional details.</p>
+        <div class="form-actions"><button type="button" class="btn btn-outline cancel-dialog">Cancel</button><button class="btn btn-primary" type="submit">Register patient</button></div>
+    </form>`;
+    document.body.appendChild(dialog);
+    const close = () => dialog.close();
+    dialog.addEventListener('close', () => dialog.remove());
+    dialog.querySelector('.close-dialog').addEventListener('click', close);
+    dialog.querySelector('.cancel-dialog').addEventListener('click', close);
+    dialog.querySelector('form').addEventListener('submit', event => {
+        event.preventDefault();
+        const data = Object.fromEntries(new FormData(event.currentTarget));
+        if (window.hmsState.patients.some(p => p.phone === data.phone)) {
+            alert('A patient with this phone number already exists.'); return;
+        }
+        const newId = 'P-' + String(window.hmsState.patients.length + 1).padStart(5, '0');
+        window.hmsState.patients.push({ id: newId, ...data });
+        renderPatients(); close();
     });
-    renderPatients();
-    alert("Patient " + name + " successfully registered with ID: " + newId);
+    dialog.showModal();
 };
 
 window.openAddDoctorModal = function () {
@@ -307,3 +280,60 @@ document.addEventListener('DOMContentLoaded', () => {
     seedInitialData();
     switchTab('overview');
 });
+
+// Shared forms for the dashboard's demonstration workflows.
+function demoForm(title, fields, submit) {
+    const dialog = document.createElement('dialog');
+    dialog.className = 'patient-dialog';
+    const form = document.createElement('form');
+    form.className = 'patient-form';
+    const heading = document.createElement('div');
+    heading.className = 'form-heading';
+    const h = document.createElement('h2'); h.textContent = title;
+    const close = document.createElement('button'); close.type = 'button'; close.className = 'close-dialog'; close.textContent = '×'; close.setAttribute('aria-label', 'Close');
+    heading.append(h, close); form.append(heading);
+    const grid = document.createElement('div'); grid.className = 'form-grid';
+    fields.forEach(field => {
+        const label = document.createElement('label'); label.textContent = field.label;
+        let input;
+        if (field.options) {
+            input = document.createElement('select');
+            field.options.forEach(option => { const el = document.createElement('option'); el.value = option.value; el.textContent = option.label; input.append(el); });
+        } else { input = document.createElement('input'); input.type = field.type || 'text'; }
+        input.name = field.name; input.required = field.required !== false;
+        if (field.min !== undefined) input.min = field.min;
+        if (field.step) input.step = field.step;
+        if (field.value) input.value = field.value;
+        label.append(input); grid.append(label);
+    });
+    form.append(grid);
+    const note = document.createElement('p'); note.className = 'form-note'; note.textContent = 'Demonstration only: changes last for this browser session.'; form.append(note);
+    const error = document.createElement('p'); error.style.color = '#b42318'; error.setAttribute('role', 'alert'); form.append(error);
+    const actions = document.createElement('div'); actions.className = 'form-actions';
+    const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'btn btn-outline'; cancel.textContent = 'Cancel';
+    const save = document.createElement('button'); save.type = 'submit'; save.className = 'btn btn-primary'; save.textContent = 'Save';
+    actions.append(cancel, save); form.append(actions); dialog.append(form); document.body.append(dialog);
+    close.onclick = cancel.onclick = () => dialog.close();
+    dialog.addEventListener('close', () => dialog.remove());
+    form.addEventListener('submit', event => { event.preventDefault(); try { submit(Object.fromEntries(new FormData(form))); dialog.close(); } catch (e) { error.textContent = e.message; } });
+    dialog.showModal();
+}
+const optionList = items => items.map(item => ({value: item.id, label: `${item.id} — ${item.fullName || item.wardName}`}));
+const field = (name, label, extra = {}) => ({name, label, ...extra});
+const today = () => new Date().toISOString().slice(0, 10);
+window.openAddDoctorModal = () => demoForm('Add a specialist', [field('fullName','Full name'),field('specialization','Specialization'),field('department','Department'),field('phone','Phone', {type:'tel'}),field('email','Email',{type:'email',required:false})], data => {
+    data.id = 'D-' + String(hmsState.doctors.length + 1).padStart(5,'0'); hmsState.doctors.push(data); renderDoctors();
+});
+window.openScheduleModal = () => demoForm('Book an appointment', [field('patientId','Patient',{options:optionList(hmsState.patients)}),field('doctorId','Doctor',{options:optionList(hmsState.doctors)}),field('date','Date',{type:'date',value:today()}),field('time','Time',{type:'time'}),field('purpose','Purpose')], data => {
+    if (!data.patientId || !data.doctorId) throw Error('Add a patient and doctor first.');
+    if (hmsState.appointments.some(a => a.doctorId === data.doctorId && a.date === data.date && a.time === data.time && a.status === 'Scheduled')) throw Error('The doctor already has an appointment at this time.');
+    hmsState.appointments.push({id:'APT-'+String(hmsState.appointments.length+1).padStart(5,'0'),...data,status:'Scheduled'}); renderAppointments();
+});
+window.InpatientModule.openAddRoomModal = () => demoForm('Add a ward or room', [field('id','Room ID'),field('wardName','Ward name'),field('type','Room type'),field('totalBeds','Number of beds',{type:'number',min:1}),field('dailyRate','Daily rate',{type:'number',min:1,step:'0.01'})], data => { if (InpatientModule.getRooms().some(r=>r.id===data.id)) throw Error('Room ID already exists.'); InpatientModule.addRoom(data); hmsState.rooms = InpatientModule.getRooms(); InpatientModule.renderWardTab(); });
+window.InpatientModule.openAdmitModal = () => demoForm('Admit a patient', [field('patientId','Patient',{options:optionList(hmsState.patients)}),field('doctorId','Doctor',{options:optionList(hmsState.doctors)}),field('roomId','Room',{options:optionList(InpatientModule.getRooms())}),field('admissionDate','Admission date',{type:'date',value:today()}),field('reason','Reason')], data => { InpatientModule.admitPatient(data); hmsState.admissions = InpatientModule.getAdmissions(); InpatientModule.renderAdmissionsTab(); });
+window.InpatientModule.openDischargeModal = id => demoForm('Discharge patient', [field('date','Discharge date',{type:'date',value:today()}),field('summary','Discharge summary')], data => { InpatientModule.dischargePatient(id,data.date,data.summary); InpatientModule.renderAdmissionsTab(); });
+window.InpatientModule.viewDischargeSummary = id => { const a = InpatientModule.getAdmissions().find(x=>x.id===id); if (a) alert(a.dischargeSummary || 'No summary available.'); };
+window.RecordsBillingModule.openAddRecordModal = () => demoForm('Add medical record', [field('patientId','Patient',{options:optionList(hmsState.patients)}),field('doctorId','Doctor',{options:optionList(hmsState.doctors)}),field('visitDate','Visit date',{type:'date',value:today()}),field('symptoms','Symptoms',{required:false}),field('diagnosis','Diagnosis'),field('treatmentNotes','Treatment notes',{required:false}),field('prescriptions','Prescriptions (comma separated)',{required:false})], data => { data.prescriptions = data.prescriptions.split(',').map(s=>s.trim()).filter(Boolean); RecordsBillingModule.createMedicalRecord(data); RecordsBillingModule.renderRecordsTab(); });
+window.RecordsBillingModule.viewRecordDetails = id => { const r = RecordsBillingModule.getMedicalRecords().find(x=>x.id===id); if (r) alert(`Symptoms: ${r.symptoms || '—'}\nDiagnosis: ${r.diagnosis}\nTreatment: ${r.treatmentNotes || '—'}`); };
+window.RecordsBillingModule.openCreateBillModal = () => demoForm('Generate a bill', [field('patientId','Patient',{options:optionList(hmsState.patients)}),field('issueDate','Issue date',{type:'date',value:today()}),field('dueDate','Due date',{type:'date',value:today()}),field('description','Charge description'),field('amount','Amount',{type:'number',min:0.01,step:'0.01'})], data => { RecordsBillingModule.createBill({...data,items:[{category:'Other',description:data.description,amount:Number(data.amount)}]}); RecordsBillingModule.renderBillingTab(); });
+window.RecordsBillingModule.openPaymentModal = id => demoForm('Record payment', [field('amount','Amount',{type:'number',min:0.01,step:'0.01'}),field('paymentDate','Payment date',{type:'date',value:today()}),field('method','Payment method',{options:['Cash','Card','Other'].map(x=>({value:x,label:x}))})], data => { RecordsBillingModule.recordPayment({...data,billId:id}); RecordsBillingModule.renderBillingTab(); });

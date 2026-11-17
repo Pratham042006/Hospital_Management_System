@@ -89,7 +89,7 @@ window.RecordsBillingModule = (function () {
     }
 
     function renderRecordsTab() {
-        const container = document.getElementById('medical-records-view');
+        const container = document.getElementById('records-view');
         if (!container) return;
         container.innerHTML = `
             <div class="card header-card">
@@ -145,15 +145,15 @@ window.RecordsBillingModule = (function () {
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-label">Total Invoiced</div>
-                    <div class="stat-value">$${totalBilled.toFixed(2)}</div>
+                    <div class="stat-value">₹${totalBilled.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                 </div>
                 <div class="stat-card stat-success">
                     <div class="stat-label">Total Collected</div>
-                    <div class="stat-value">$${totalCollected.toFixed(2)}</div>
+                    <div class="stat-value">₹${totalCollected.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                 </div>
                 <div class="stat-card stat-warning">
                     <div class="stat-label">Outstanding Balance</div>
-                    <div class="stat-value">$${totalOutstanding.toFixed(2)}</div>
+                    <div class="stat-value">₹${totalOutstanding.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                 </div>
             </div>
             <div class="card header-card">
@@ -184,9 +184,9 @@ window.RecordsBillingModule = (function () {
                                 <td><strong>${b.id}</strong></td>
                                 <td>${b.patientId}</td>
                                 <td>${b.issueDate}</td>
-                                <td>$${b.totalAmount.toFixed(2)}</td>
-                                <td>$${b.paidAmount.toFixed(2)}</td>
-                                <td>$${b.balance.toFixed(2)}</td>
+                                <td>₹${b.totalAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td>₹${b.paidAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td>₹${b.balance.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                                 <td><span class="badge badge-${b.status.toLowerCase().replace(' ', '-')}">${b.status}</span></td>
                                 <td>
                                     ${b.status !== 'Paid' ? `

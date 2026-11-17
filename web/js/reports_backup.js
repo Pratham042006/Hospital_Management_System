@@ -86,8 +86,8 @@ window.ReportsBackupModule = (function () {
                 </div>
                 <div class="stat-card stat-success">
                     <div class="stat-label">Total Revenue Collected</div>
-                    <div class="stat-value">$${rev.collected}</div>
-                    <div class="stat-footnote">Billed: $${rev.billed} | Pending: $${rev.outstanding}</div>
+                    <div class="stat-value">₹${Number(rev.collected).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    <div class="stat-footnote">Billed: ₹${Number(rev.billed).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})} | Pending: ₹${Number(rev.outstanding).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                 </div>
             </div>
 
@@ -155,6 +155,8 @@ window.ReportsBackupModule = (function () {
     }
 
     function triggerExport() {
+        alert('Backup export is not connected to the web dashboard yet.');
+        return;
         const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
         const logEntry = {
             time: timestamp,
@@ -167,6 +169,8 @@ window.ReportsBackupModule = (function () {
     }
 
     function triggerVerify() {
+        alert('Backup integrity verification is not connected to the web dashboard yet.');
+        return;
         const timestamp = new Date().toISOString().replace('T', ' ').slice(0, 19);
         const logEntry = {
             time: timestamp,

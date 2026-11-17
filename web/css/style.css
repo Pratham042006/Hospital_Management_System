@@ -465,3 +465,15 @@ body {
     border-radius: 6px;
     font-size: 0.9rem;
 }
+.patient-dialog { border: 0; border-radius: 16px; width: min(720px, 94vw); padding: 0; box-shadow: 0 20px 70px #14243b55; color: #192b44; }
+.patient-dialog::backdrop { background: #101d30a8; }
+.patient-form { padding: 28px; }
+.form-heading { display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px; }
+.form-heading h2 { margin: 0 0 6px; }.form-heading p, .form-note { color: #65748b; font-size: .9rem; }
+.close-dialog { background: none; border: 0; font-size: 28px; cursor: pointer; color: #65748b; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.form-grid label { display: grid; gap: 7px; font-size: .86rem; font-weight: 600; }
+.form-grid input, .form-grid select { width: 100%; min-width: 0; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; background: white; }
+.form-grid input:focus, .form-grid select:focus { outline: 2px solid #76a7f8; border-color: #477fe3; }
+.form-note { margin: 20px 0; }.form-actions { display: flex; justify-content: flex-end; gap: 10px; }
+@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .patient-dialog { max-height: 90vh; } }
